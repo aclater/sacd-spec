@@ -27,8 +27,13 @@ what crossed the wall.
 | DSF, DSDIFF | the public DSF and DSDIFF file format specifications | | public documents | permitted, but not consulted: no section depends on them |
 | Python | Python 3 standard library codec behaviour (`latin-1`, `shift_jisx0213`, `euc_kr`, `gb2312`, `big5`, `str.isspace`) | 3.14 | PSF | exact character-set behaviour of specification 2, 2.6 |
 
-Not consulted: the source of sacd-ripper or `sacd_extract`, FFmpeg's own source tree, the
-Philips/ISO MPEG-4 reference DST decoder, or any other SACD or DST implementation.
+Not consulted: the source of sacd-ripper or `sacd_extract`, FFmpeg's source tree itself (but
+FFmpeg-derived code was read, see the disclosure below), the Philips/ISO MPEG-4 reference DST
+decoder, or any other SACD or DST implementation.
+
+Every source is pinned to the version that was read. pysacd has changed since commit 8834da1;
+a later change to this repository that consults pysacd again records, in its entry below, the
+commit it read, and the table above keeps the commit of the original reading.
 
 **Disclosure.** P-DSTC, pysacd's `csrc/dstdec.c`, which was read, is itself a port of FFmpeg's
 DST decoder (LGPL-2.1-or-later), extended with parts written from P-DST. Reading it therefore
