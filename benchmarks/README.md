@@ -27,22 +27,34 @@ document calls it `bench`. It MUST support:
 | Invocation | Behaviour |
 |---|---|
 | `bench --version` | prints the implementation name and version on one line and exits 0 |
-| `bench decode IMAGE --area A --threads N --sink S` | decodes every track of area `A` of image `IMAGE` and exits 0, or exits non-zero with an error class from specification 7 on stderr |
+| `bench decode IMAGE --area A --threads N --sink S` | decodes every track of area `A` of image `IMAGE` and exits 0, or exits non-zero with an error code on stderr (below) |
 
 - `IMAGE` is a path to a disc image in any of the sector formats of specification 1.
-- `A` is `2ch` or `mc` (the 2-channel or the multichannel area, specification 3).
+- `A` is `2ch` or `mc` and selects an area by its **slot** (the 2-channel or the multichannel
+  slot, specification 3, 3.1), not by its kind: a slot can yield an area of the other kind.
 - `N` is the number of worker threads, 1 or more; `0` means one per logical CPU. With `N = 1`
   the program MUST do all decoding on a single thread.
 - `S` is the sink:
-  - `hash`: for every track, print one line to stdout: the track number, a tab, then the
-    SHA-256 of each channel's track audio, in channel order, separated by tabs. The
+  - `hash`: for every track, in track number order, print one line to stdout: the track
+    number in decimal, a tab, then the SHA-256 of each channel's track audio, in channel
+    order, separated by tabs. A track with no track audio (an outcome of specification 7,
+    7.7.4: `track-empty`, `channel-count-unsupported` or `track-exceeds-capacity`) prints the
+    track number, a tab and that outcome code instead; this is not an error and the exit
+    status stays 0. The
     track audio and its hash are exactly as defined for the `sha256` field in
     [corpus/README.md](../corpus/README.md) (`(end_frame - first_frame) x 4704` bytes per
     channel, earliest sample in the most significant bit).
   - `null`: decode everything and discard the result. This measures decoding alone.
-  - `raw DIR`: write each channel's track audio to `DIR/TT-C.dsd`, where `TT` is the
-    two-digit track number and `C` the zero-based channel index. This measures decoding
-    and writing.
+  - `raw DIR`: write each channel's track audio to `DIR/TT-C.dsd`, where `TT` is the track
+    number in decimal, zero-padded to at least two digits (`01` to `99`, then `100` to `255`),
+    and `C` the zero-based channel index in decimal. A track with no track audio writes no
+    file. This measures decoding and writing.
+- **Errors.** When the program cannot decode the area it prints one error code on a line to
+  stderr and exits non-zero. The code is the one of specification 7, 7.7.1 when the image is
+  rejected; `no-such-area` (a code of this document only, not of specification 7) when the
+  image is accepted but slot `A` yields no area, because the slot is unused or the area was
+  skipped (7.7.2); and a code of the program's own for anything else, such as an unreadable
+  file or bad arguments. Warnings MAY also be printed to stderr.
 - The program reads the image only through ordinary file reads, and SHOULD print nothing
   else to stdout.
 
