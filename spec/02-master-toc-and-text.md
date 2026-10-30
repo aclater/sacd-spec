@@ -227,7 +227,8 @@ code of 0xFF selects set 7.
    are normative and complete: each lists every single byte and every two-byte sequence that is
    a character of the set, with the code point (or, for 25 entries of set 3, the two code points:
    a base and a combining mark) it decodes to. Published mappings of these standards disagree at
-   some positions; where they do, the table decides. A reader MUST decode exactly by the table.
+   some positions; where they do, the table decides. A reader MUST decode exactly by the table
+   and the rule of 2.6.3, with the single exception stated there for the EUC-KR pair 0xA4D4.
    Notable consequences:
    - Set 3 decodes the single bytes 0x5C to U+00A5 (yen sign) and 0x7E to U+203E (overline),
      and 0xA1 to 0xDF to the half-width katakana U+FF61 to U+FF9F. Its two-byte 0x815F decodes
@@ -260,7 +261,8 @@ from step 1, and a string cut in the middle of a two-byte character ends with U+
 One exception: in set 4, the pair 0xA4D4 (HANGUL FILLER) can begin an 8-byte composition
 sequence defined by KS X 1001:1998. How a reader decodes a string containing the pair 0xA4D4 is
 **implementation-defined**; it is RECOMMENDED to treat 0xA4D4 like any other unlisted pair
-(steps 3 and 4). The corpus contains no such string.
+(steps 3 and 4), which decodes a lone 0xA4D4 as two U+FFFD. The composition rules themselves
+are outside these specifications. The corpus contains no such string.
 
 Decoding never fails and never produces surrogate code points.
 

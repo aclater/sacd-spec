@@ -26,6 +26,15 @@ The master TOC (specification 2, 2.3) has two **area slots**:
    accept this and report each area with both its slot and its kind.
 4. If no used slot yields an area, **reject the image** with `no-audio-areas`. This includes a
    disc where neither slot is used.
+5. **Order of checks and warnings.** For one slot, the checks run in this order: 3.2 (reading
+   and choosing the copy), 3.3 (signature), 3.7.0 item 4 (track lists present), 3.7.3 item 2
+   (`SACD_IGL` extent), 3.9.2 item 1 (audio range). The first that fails skips the area. The
+   warnings of 3.2 (`area-toc1-unreadable`, `area-toc2-unreadable`, `area-toc-copies-differ`)
+   are reported even if the area is then skipped. The track warnings of 3.8.1
+   (`track-text-offset-invalid`, `track-text-type-unknown`) and 3.9.2 (`track-past-playtime`,
+   `track-lsn-outside-area`) are reported **only if the area is not skipped**: a reader may parse
+   track text before it knows whether the area survives, but it MUST then discard those
+   warnings when the area is skipped.
 
 ## 3.2 Reading an area TOC: TOC-1 and TOC-2
 
@@ -300,8 +309,9 @@ Notes:
 
 1. Step 4.5 starts the search at `q + r`, the position of the string's terminator. When a
    string was cut at 4096 bytes there is no terminator there, so the search starts inside the
-   string and the next "item" begins with a byte of that string. This is the normative result:
-   it keeps the work for one track's items bounded by about `E` bytes for any input.
+   string and the next "item" begins with a byte of that string. This is the normative result.
+   The work for one track's items is bounded by 255 strings of at most 4096 bytes plus one
+   pass of zero-skipping over `Z`.
 2. Strings are bounded by the end of `Z`, not by the end of the `SACDTTxt` sector: a string
    that is not terminated within the sector continues into the following sectors.
 3. Text offsets may point anywhere in `Z`, including outside the `SACDTTxt` sector.
@@ -351,5 +361,5 @@ parsing an area TOC.
 | Timecode frame number | 0 to 1 166 880 | (all values valid) |
 | Track start + duration | at most the play time | clamped, with a warning |
 | Text string | at most 4096 bytes, within `Z` | cut |
-| Track text items per track | 0 to 255 | items past `E` do not exist |
+| Track text items per track | 0 to 255 | an item does not exist if it would start at or after `E - 1` (`q + 2 > E`) |
 | Sub-structure walk | at most `E / 2048` steps | stops at an unknown signature or at `E` |

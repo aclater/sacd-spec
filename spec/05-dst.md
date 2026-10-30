@@ -49,7 +49,7 @@ of 5.3 follow from `FL`. Nothing else depends on the rate.
    -2^(n-1) to 2^(n-1) - 1.
 4. `bslbf(1)` is one bit.
 5. `floor` is mathematical floor; all divisions are exact, followed by the stated rounding.
-   `floor((x + 4) / 8)` equals an arithmetic right shift of `x + 4` by 3 for every integer x.
+   For example `floor((x + 4) / 8)` is -1 for x = -5 and 0 for x = -4.
 6. `|x|` is the absolute value, computed in ordinary integers.
 
 ### 5.1.4 Bit order
@@ -389,7 +389,9 @@ State: `A`, the interval width (12 bits); `C`, the code value (12 bits); `ptr`, 
 the next code bit to read. A code bit at index `>= fs` reads as 0.
 
 **Initialisation:** `A = 4095`; `C` = the 12 bits `cb[1] .. cb[12]` as an MSB-first integer;
-`ptr = 13`.
+`ptr = 13`. If `C = 4095` (the 12 bits are all 1) the frame is **invalid**: the interval
+cannot contain such a code, and decoding it would make C grow without bound. Otherwise
+`C < A` holds at initialisation and after every symbol.
 
 **Decoding one symbol with probability p (1 to 128):**
 
@@ -402,7 +404,8 @@ the next code bit to read. A code bit at index `>= fs` reads as 0.
 5. **Renormalise:** while `A < 2048`: `A = 2 x A`, `C = 2 x C + cb[ptr]`, `ptr = ptr + 1`.
 
 Before every symbol `A >= 2048`, so Q is 8 to 15, `w0` is 8 to 1920 and `w1` is at least 128:
-both sub-intervals are non-empty, and A and C stay within 12 bits.
+both sub-intervals are non-empty. Because `C < A` is preserved (step 4 keeps C below the new
+A, and renormalisation doubles both), A and C always stay within 12 bits.
 
 **End of frame:** after the last symbol, the number of unread code bits is `fs - ptr`. If it
 is greater than 7 (`ptr < fs - 7`) the frame is **invalid**. Unread bits may have any value.
@@ -447,6 +450,7 @@ MUST NOT report any other frame as invalid.
 | 14 | ptable-range | reconstructed entry outside 1 to 128 | 5.3.6 |
 | 15 | arithmetic-code | `fs > 0` and `cb[0] = 1` | 5.3.7 |
 | 16 | unread-code-bits | more than 7 code bits left unread at the end | 5.5.7 |
+| 17 | code-out-of-range | `cb[1] .. cb[12]` are all 1 (the initial C is 4095) | 5.5.7 |
 
 The codes in this table are names for the conditions; a decoder MAY report them, but the
 corpus checks only that a frame is invalid. When several conditions hold, which one is

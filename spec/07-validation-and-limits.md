@@ -73,7 +73,7 @@ specifications; report it. The section references say where each rule is defined
 | Loudspeaker configuration | any | reported | | 3.4.1 |
 | Total play time | any timecode | | | 3.3 |
 | Track count | 0 to 255 | all valid | | 3.9.1 |
-| Area text count | 0 to 10 | above 10: list capped at 10 | | 3.5 |
+| Area text channel count (offset 80) | 0 to 10 | above 10: list capped at 10 | | 3.5 |
 | Area text offsets | 1 to `E - 1` | 0 or at least `E`: absent | | 3.6 |
 | Sub-structure walk | ends at an unknown signature or the end of the TOC | | | 3.7.0 |
 | `SACDTRL1` and `SACDTRL2` | both found by the walk | either missing | `area-track-list-missing` (skip the area) | 3.7.0 |

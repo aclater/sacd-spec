@@ -116,7 +116,10 @@ Rewritten from P-DST. What changed relative to P-DST:
   1 byte are invalid; header overrun (including inside a Rice code) is invalid; explicit
   filter lengths at most 4 shared and 3 per channel;
 - made the plain-frame zero-fill normative;
-- moved the encoder notes (P-DST 6) to an informative annex.
+- moved the encoder notes (P-DST 6) to an informative annex;
+- added rule 17 (initial code value 4095 is invalid) after the second cold read. **Deviation:**
+  pysacd's decoder does not check this and decodes such a frame to an implementation-specific
+  result; the corpus case `dst-code-all-ones` follows this specification.
 
 The syntax tables, prediction coefficient tables, arithmetic decoder, history, half-probability
 rule, X bit and output packing are those of P-DST, checked against P-DSTC.
@@ -140,14 +143,16 @@ reports as free-text warnings. 7.9 (real-disc survey) from P-SEC.
 
 ### corpus/
 
-- Images: built with P-GEN (`build_image`, the raw-layout re-packer and the 95-image hostile
-  corpus, taken unchanged) and P-DSTENC (feature frames and invalid frames at 2, 5 and 6
+- Images: built with P-GEN (its disc builder, its raw-layout re-packer and its 95-image
+  hostile corpus, taken unchanged) and P-DSTENC (feature frames and invalid frames at 2, 5 and 6
   channels, synthetic sigma-delta test signal). New cases (all with `origin: new`) were made by
   calling those builders with other parameters or by patching their output: character sets 0
   to 7, album set, no text, full text, TOC-2 fallback, coded DST in raw layouts, a 5-channel
   plain disc, invalid DST frames inside discs, truncated DST frames, invalid CJK text.
 - Case names of the malformed cases taken from the hostile-image corpus are the names that
-  corpus uses, for traceability.
+  corpus uses, for traceability. The images' own text (for example the catalogue number `PYSACD-TEST`
+  and titles naming pysacd) is test data written by that generator, not an identifier used by
+  these specifications.
 - Expected values: computed with P-TOC and the decoding engine (P-ENGINE, P-DEMUX, P-DSTC),
   configured to follow specification 4 where it deviates (see 4.2 and 4.8 above), mapping
   pysacd's warning texts to the codes of specification 7. Hashes of the DST feature cases were
