@@ -159,6 +159,8 @@ Consolidated from specifications 1 to 6. Starting points: P-SEC ("Hostile images
 "PS3 network protocol"), P-HOSTILE. Diagnostic codes are new names for conditions that P-TOC
 reports as free-text warnings. 7.9 (real-disc survey) from P-SEC. Diagnostics in the
 allocation bound of 7.1 item 2 were added in answer to issue #5.
+The work bound of 7.1 item 3 (one pass per track or range requested) and 4.2 item 6 were
+restated in answer to issue #18.
 
 ### corpus/
 
@@ -198,7 +200,8 @@ read), `sacd_extract`, pysacd 0.2.1 and 0.2.2 (commit 8a179b5 and later, release
 8.1.3; numbers, conditions and the comparison with the targets only. Round 2 measured only `bench` from scarletbook-rs v0.2.0's release assets (source not read)
 and reuses round 1's reference figures. The `bench` output for tracks without audio, area selection by slot,
 `no-such-area` and track-number padding were decided for this document in answer to issue #9;
-no source was consulted.
+no source was consulted. The names of the checksum and CPU-specific assets, and other builds
+of `bench` (Release binaries), were decided in answer to issue #14; no source was consulted.
 
 ## Open points
 
