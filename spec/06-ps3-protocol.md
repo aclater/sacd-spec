@@ -19,8 +19,7 @@ MUST follow this specification. Conventions are in [00-conventions.md](00-conven
 
 ## 6.2 Transport
 
-1. TCP. The server listens on port **2002** by default. It accepts one client at a time
-   (listen backlog 1).
+1. TCP. The server listens on port **2002** by default. It serves one client at a time.
 2. Each request and each response is one **message** (6.3), followed immediately by a single
    byte 0x00. There is no length prefix. Because no field key can be 0 (6.3.2), a 0x00 byte
    **in a key position** ends the message. Other 0x00 bytes occur freely inside field values (a
@@ -38,6 +37,8 @@ Messages use a subset of the Protocol Buffers (proto2) binary encoding.
 ### 6.3.1 Varints
 
 A **varint** encodes an unsigned integer in groups of 7 bits, least significant group first.
+A receiver MUST accept non-minimal encodings (extra groups of zero bits) up to the 10-byte
+limit, except for the key rule of 6.3.2.
 Each byte carries one group in bits 0 to 6; bit 7 is 1 on every byte except the last. A varint
 is at most 10 bytes long (64 bits).
 
@@ -61,11 +62,12 @@ Field numbers are 1 or more, so no key is 0; a key byte of 0x00 is therefore the
 marker of 6.2. Any other key whose field number is 0 (a key of value 1 to 7, or a value-0 key
 written in more than one byte, such as 0x80 0x00) is a protocol error. This protocol's messages use wire types 0 and 2 only. A receiver:
 
-1. MUST skip fields of wire types 1 and 5 and fields with field numbers it does not know (after
-   reading their payload, which counts towards the limits of 6.7);
-2. MUST treat any other wire type (3, 4, 6, 7) as a protocol error;
-3. MUST treat a field number defined in 6.3.3 or 6.3.4 that arrives with a wire type other
-   than the one given there (for example the data field as a varint) as a protocol error;
+1. MUST treat wire types 3, 4, 6 and 7 as a protocol error, in any field;
+2. for a field number defined for this message direction (6.3.3 for requests, 6.3.4 for
+   responses), MUST treat a wire type other than the one given there as a protocol error (for
+   example, in a response, field 3 sent as a varint, or field 2 sent with wire type 1 or 5);
+3. for a field number not defined for this message direction, MUST read and skip its payload
+   (wire types 0, 1, 2 or 5); it counts towards the limits of 6.7;
 4. when a defined field occurs more than once in one message, MUST use its last occurrence
    (the proto2 rule).
 
@@ -147,9 +149,8 @@ Consequences that clients MUST handle:
 3. A client that follows item 2 never receives `r = 0` from a correct server. A result of 0 is
    therefore a protocol error (6.7 item 5).
 
-When an encrypted range is first read, the server checks whether the disc is protected at all
-(some plain DSD discs are not) by examining bytes 16 to 23 of the first block. This affects
-only the server's own decryption, not the bytes sent.
+Some plain DSD discs have no protection; the server detects this itself. It does not change
+the bytes sent.
 
 ## 6.6 Session
 
@@ -178,7 +179,7 @@ A client MUST treat the server as hostile. In particular:
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
 | 5 | For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
-| 7 | Bound the time per response: a deadline covering the whole response, not each receive, so that a server cannot trickle a response a byte at a time. | 60 s RECOMMENDED |
+| 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. | 60 s RECOMMENDED |
 | 8 | Bound reconnection attempts. | 3 in a row RECOMMENDED, with back-off |
 | 9 | After a reconnection, check that the disc size and the master TOC sectors (LSN 510 to 519) are unchanged; if not, the disc changed and the transfer in progress (the sequence of reads the client was making) MUST fail with `network-disc-changed`. | |
 | 10 | Apply specifications 1 to 4 and 7 to the sectors received exactly as to an image file. In particular, every LSN taken from a TOC MUST be checked against the reported disc size before it is requested. | |
@@ -190,8 +191,8 @@ specification reports them with these codes (in addition to those of specificati
 
 | Code | Condition | Outcome |
 |---|---|---|
-| `network-connection-lost` | the connection could not be made, was closed by the server, or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
-| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), or a response of the wrong type | the transfer fails; the client MUST NOT reconnect to retry it |
+| `network-connection-lost` | the connection could not be made, was closed by the server (including in the middle of a message), or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
+| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), a response of the wrong type, or bytes received when no response is outstanding (after a response's terminating 0x00 and before the next request) | the transfer fails; the client MUST NOT reconnect to retry it |
 | `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result below 0 (this row takes precedence over item 5 for negative read results) | the transfer fails; the client MAY report the result value |
 | `network-disc-too-large` | the reported disc size exceeds item 6 | the transfer fails |
 | `network-disc-changed` | item 9 | the transfer fails |
@@ -212,7 +213,12 @@ A server that serves an image file for testing SHOULD:
 4. listen on the loopback interface unless told otherwise;
 5. when the served file is a raw 2054- or 2064-byte image, serve its logical sectors (the 2048
    data bytes of each stored sector, specification 1, 1.3) and report its `N` as the disc
-   size.
+   size;
+6. answer an open disc for an image from which specifications 1 to 3 yield no area with
+   result -1; answer a repeated open by opening the disc again (the block size of 6.5 is kept);
+   answer a read with `n = 0`, or at an offset at or past the disc size, with result 0 and no
+   data (after updating the block size as 6.5 says); and close the connection on a request it
+   cannot decode or whose type is missing or unknown.
 
 ## 6.9 Limits
 

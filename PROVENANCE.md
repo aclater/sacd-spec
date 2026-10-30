@@ -181,8 +181,8 @@ readers agree, but the choice may not match the Scarletbook standard, which was 
 5. **Area kind versus slot**: the kind comes from the signature, so a disc can report two areas
    of the same kind. The standard may require the 2-channel slot to hold a `TWOCHTOC`.
 6. **Frame format field** (3.4.2) is informative; the per-sector DST flag decides decoding.
-   "DSD 3 in 16" is assumed to use the same interleaved layout as "DSD 3 in 14". The corpus has
-   no area with frame format 3.
+   "DSD 3 in 16" is assumed to use the same interleaved layout as "DSD 3 in 14"; the corpus case
+   `dsd-3in16-format` follows that assumption, which is not confirmed by a real disc.
 7. **Field meanings not specified**: track start and duration flag bytes, track offset, track
    attribute, area mute flags, maximum available channels, genre table 2 names. They are
    reported raw.
@@ -204,6 +204,24 @@ the format defines), uses names chosen for this specification, and none was tran
 code. The DST syntax tables follow the conventional MPEG syntax-table style. The quirks they
 record (for example the item-skipping rule of 3.8.1) are normative behaviour, kept so that
 readers agree on hostile input.
+
+### Names (third cold read)
+
+- DST syntax element names in specification 5 (`same_segm_all_ch`, `coded_pred_order` and so
+  on) are those of P-DST, which states that they are descriptive names chosen for that
+  document, in the style of the MPEG syntax, and not the identifiers of any implementation.
+- Master and area TOC field names (album catalogue number, maximum byte rate, area mute flags,
+  track attribute and so on) and the corresponding manifest keys are the format's own field
+  names, written in snake case; the manifest uses the US spelling `catalog` as the format's
+  field name does. Manifest keys that are not format field names (`toc_lsn`, `playtime_frames`,
+  `audio_start_lsn`, `start_flags`, `duration_flags`, `length_sectors`, `first_frame`,
+  `end_frame`, `missing_frames`, `invalid_dst_frames`) were chosen for this repository.
+- Implementation-derived constants that are normative here (explicit segment-length limits,
+  frames of 0 or 1 byte invalid, the 0x69 and 0x55 fills, the 65 536-byte frame limit, the
+  128-sector area TOC limit, 7 frames per sector) are recorded as such in this file; they are
+  facts about the agreed behaviour, not code.
+- The PS3 server behaviour of specification 6, 6.5 (the block-size table and the need for a
+  priming read) describes observable protocol behaviour that clients must handle.
 
 ## Licensing note
 

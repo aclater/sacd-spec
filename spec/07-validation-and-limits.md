@@ -33,7 +33,7 @@ specifications; report it. The section references say where each rule is defined
 
 | Value | Valid range | Out of range | Code | Spec |
 |---|---|---|---|---|
-| Image size | any | fewer than `510 x P + D + 8` bytes means no layout matches | `not-scarletbook` (reject) | 1.4 |
+| Image size | any | for each format, fewer than `510 x P + D + 8` bytes means that format cannot match; if no format matches | `not-scarletbook` (reject) | 1.4 |
 | `SACDMTOC` at LSN 510 | present in one of the three formats | absent | `not-scarletbook` (reject) | 1.4 |
 | Master TOC sectors (LSN 510 to 519) | all exist | any missing | `master-toc-truncated` (reject) | 2.2 |
 | Version major (master offset 8) | 0 or 1 | 2 to 255 | `master-toc-version-unsupported` (reject) | 2.2 |
@@ -102,7 +102,7 @@ specifications; report it. The section references say where each rule is defined
 | DST sector count | equals the frame's audio packet count | otherwise the frame is never complete (missing) | | 4.4.2 |
 | Plain frame size | exactly `C x 4704` | otherwise never complete (missing) | | 4.4.2 |
 | Frame timecode | strictly increasing | a frame not above the previous accepted one is discarded | | 4.5 |
-| Frame slot never filled | | filled with 0x69 | (counted as missing) | 4.6 |
+| Timeline position never filled | | filled with 0x69 | (counted as missing) | 4.6 |
 | DST frame | valid by 5.6 | invalid | replace the frame with 0x55 (counted as invalid) | 4.6, 5.6 |
 
 ## 7.5 Tracks and output
@@ -189,6 +189,10 @@ codes. The corpus therefore compares, for each image that is **not** rejected, t
 error code of 7.7.1 is compared.
 
 ### 7.7.4 Per-track outcomes
+
+These codes are reported per track as the reason a track has no audio. They are not
+warnings: they are not part of the warning set of 7.7.3, and a reader that also reports them
+through its warning mechanism must not let them count as warnings for comparison.
 
 | Code | Outcome | Condition | Spec |
 |---|---|---|---|

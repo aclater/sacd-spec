@@ -223,7 +223,10 @@ code of 0xFF selects set 7.
 
 1. **ISO 8859-1** maps each byte value `b` to the code point U+00`b` (0x00 to 0xFF). It
    never fails.
-2. **Sets 3 to 6** are defined by their mapping tables in [charsets/](charsets/). The tables
+2. **Sets 3 to 6** are defined by their mapping tables in [charsets/](charsets/). Table file
+   format: UTF-8 text; lines starting with `#` are comments; every other line is a byte sequence
+   as 2 or 4 upper-case hexadecimal digits, a tab, and one or more code points written `U+`
+   followed by 4 to 6 upper-case hexadecimal digits, separated by single spaces. The tables
    are normative and complete: each lists every single byte and every two-byte sequence that is
    a character of the set, with the code point (or, for 25 entries of set 3, the two code points:
    a base and a combining mark) it decodes to. Published mappings of these standards disagree at
@@ -259,9 +262,11 @@ Consequently an invalid lead byte produces one U+FFFD and the byte after it is d
 from step 1, and a string cut in the middle of a two-byte character ends with U+FFFD.
 
 One exception: in set 4, the pair 0xA4D4 (HANGUL FILLER) can begin an 8-byte composition
-sequence defined by KS X 1001:1998. How a reader decodes a string containing the pair 0xA4D4 is
-**implementation-defined**; it is RECOMMENDED to treat 0xA4D4 like any other unlisted pair
-(steps 3 and 4), which decodes a lone 0xA4D4 as two U+FFFD. The composition rules themselves
+sequence defined by KS X 1001:1998. When the procedure above reaches a position `i` whose pair
+is 0xA4D4, how the rest of the string from `i` is decoded is **implementation-defined**; the
+part before `i` is decoded as above. It is RECOMMENDED to treat 0xA4D4 like any other unlisted
+pair (steps 3 and 4): 0xA4 then yields U+FFFD and decoding continues at the 0xD4, which may
+pair with the byte after it. The composition rules themselves
 are outside these specifications. The corpus contains no such string.
 
 Decoding never fails and never produces surrogate code points.
