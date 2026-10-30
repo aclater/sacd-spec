@@ -4854,7 +4854,7 @@
    "id": "hostile-base",
    "category": "valid",
    "origin": "pysacd hostile-image corpus",
-   "purpose": "The unbroken base disc of the malformed set: a stereo area of 12 plain-in-DST frames (DST_coded = 0) in 3 tracks and a 6-channel plain DSD area of 6 frames in 2 tracks. Every malformed case below starts from it and breaks one thing.",
+   "purpose": "The unbroken base disc of the malformed set: a stereo area of 12 plain-in-DST frames (DST_coded = 0) in 3 tracks and a 6-channel plain DSD area of 6 frames in 2 tracks. Most malformed cases start from it and break one thing.",
    "input": "corpus/images/hostile-base.iso",
    "input_sha256": "e4c928db527d55aba92ec31d6bdc1882d7fee86be06630f9a0d8854209d96c8e",
    "input_bytes": 1439744,

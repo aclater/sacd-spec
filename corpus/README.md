@@ -215,7 +215,8 @@ authority for them:
   of frame completeness, and the exact threshold of 7 unread DST code bits;
 - the cap of 10 area locales, and that an unknown track text type with an empty string is not
   reported;
-- a 1-byte plain DST frame (all 1-byte frames in the corpus are coded);
+- DST rule 1 for a 1-byte frame whose `DST_coded` bit is 0 (every 1-byte frame is invalid,
+  but all 1-byte frames in the corpus have the bit set);
 - a raw 2054-byte image whose sectors are misaligned (`layout-2054-shifted` is, despite its
   name, aligned); a ninth ptable segment; EUC-KR composition sequences.
 
