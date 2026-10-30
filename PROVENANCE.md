@@ -27,11 +27,19 @@ what crossed the wall.
 | DSF, DSDIFF | the public DSF and DSDIFF file format specifications | | public documents | permitted, but not consulted: no section depends on them |
 | Python | Python 3 standard library codec behaviour (`latin-1`, `shift_jisx0213`, `euc_kr`, `gb2312`, `big5`, `str.isspace`) | 3.14 | PSF | exact character-set behaviour of specification 2, 2.6 |
 
-Not consulted: the source of sacd-ripper or `sacd_extract`, FFmpeg's source, the Philips/ISO
-MPEG-4 reference DST decoder, or any other SACD or DST implementation. pysacd's documentation
-says that its own DST decoder derives from FFmpeg's (LGPL) and that its DST description was
-written from a study of the reference decoder by a separate party; neither of those sources was
-read for this repository. pysacd's code was read as described above.
+Not consulted: the source of sacd-ripper or `sacd_extract`, FFmpeg's own source tree, the
+Philips/ISO MPEG-4 reference DST decoder, or any other SACD or DST implementation.
+
+**Disclosure.** P-DSTC, pysacd's `csrc/dstdec.c`, which was read, is itself a port of FFmpeg's
+DST decoder (LGPL-2.1-or-later), extended with parts written from P-DST. Reading it therefore
+means reading FFmpeg-derived code. It was used only to check specification 5 against the
+behaviour that produced the corpus hashes, and some normative rules were aligned with it: at
+most 4 (shared) or 3 (per channel) explicit filter lengths, at most 7 explicit ptable lengths,
+frames of 0 or 1 byte invalid, and header overrun (including inside a Rice code) invalid. No
+code, identifier or comment was taken from it; those rules are stated as behaviour. P-DST, the
+prose description specification 5 is based on, was itself written by a party that studied the
+Philips/ISO reference decoder, according to P-CR; it contains no code. Whoever relies on this
+clean room should weigh these two facts.
 
 ## Per section
 
@@ -182,7 +190,7 @@ readers agree, but the choice may not match the Scarletbook standard, which was 
    `dsd-3in16-format` follows that assumption, which is not confirmed by a real disc.
 7. **Field meanings not specified**: track start and duration flag bytes, track offset, track
    attribute, area mute flags, maximum available channels, genre table 2 names. They are
-   reported raw.
+   reported as stored (the track attribute as its low 4 bits).
 8. **Multichannel channel order** is informative, taken from the channel labels existing tools
    write.
 9. **DST segment limits**: the reference behaviour on a ninth ptable segment in shared mode was

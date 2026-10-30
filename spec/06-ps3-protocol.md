@@ -94,6 +94,11 @@ written in more than one byte, such as 0x80 0x00) is a protocol error. This prot
 | 2 | 0 | result | signed 64-bit | see 6.4; negative values are 10-byte varints |
 | 3 | 2 | data | bytes | read responses only: the sectors read |
 
+Varint fields are decoded to their full unsigned 64-bit value; nothing is truncated. A
+request type or response type other than 1 to 4, or a sector offset or sector count of 2^32 or
+more, is a protocol error for the receiver. The result is read as a signed 64-bit
+two's-complement value; values other than those 6.4 gives meaning to are handled by 6.7.
+
 A field that is absent has its default value: 0 for result, empty for data. A response without
 a response type field is a protocol error. A data field in a response other than a read
 response is ignored.
@@ -159,8 +164,8 @@ A typical client session:
 1. Connect to port 2002.
 2. Send open disc; require result 0.
 3. Send get disc size; require a result of 1 or more.
-4. Read one sector at LSN 0 (this sets the block size, 6.5 item 2), then the master TOC
-   (LSN 510, 10 sectors).
+4. Read one sector at LSN 0 (this sets the block size, 6.5 item 2), then, if the disc size
+   allows it (6.7 item 10), the master TOC (LSN 510, 10 sectors).
 5. Read the area TOCs and audio sectors it needs, looping on short reads.
 6. Send close disc; the server closes the connection.
 
@@ -179,10 +184,10 @@ A client MUST treat the server as hostile. In particular:
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
 | 5 | For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
-| 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. | 60 s RECOMMENDED |
+| 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. On a missed deadline the client MUST close the connection; late bytes are never read. | 60 s RECOMMENDED |
 | 8 | Bound reconnection attempts. | 3 in a row RECOMMENDED, with back-off |
 | 9 | After a reconnection, check that the disc size and the master TOC sectors (LSN 510 to 519) are unchanged; if not, the disc changed and the transfer in progress (the sequence of reads the client was making) MUST fail with `network-disc-changed`. | |
-| 10 | Apply specifications 1 to 4 and 7 to the sectors received exactly as to an image file. In particular, every LSN taken from a TOC MUST be checked against the reported disc size before it is requested. | |
+| 10 | Apply specifications 1 to 4 and 7 to the sectors received exactly as to a plain-format image file of `N` sectors, `N` being the reported disc size: no format detection is run (the format is plain), and the outcomes of 1.3, 1.4 and 2.2 follow from `N`. The client MUST NOT request any sector at or past `N`: if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC; every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
 
 ### 6.7.1 Error outcomes
 
@@ -192,7 +197,7 @@ specification reports them with these codes (in addition to those of specificati
 | Code | Condition | Outcome |
 |---|---|---|
 | `network-connection-lost` | the connection could not be made, was closed by the server (including in the middle of a message), or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
-| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), a response of the wrong type, or bytes received when no response is outstanding (after a response's terminating 0x00 and before the next request) | the transfer fails; the client MUST NOT reconnect to retry it |
+| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), a response of the wrong type, or bytes received after a response's terminating 0x00 (a client MUST check, after decoding each response, that no further bytes have already been received; it is not required to wait or poll for more) | the transfer fails; the client MUST NOT reconnect to retry it |
 | `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result below 0 (this row takes precedence over item 5 for negative read results) | the transfer fails; the client MAY report the result value |
 | `network-disc-too-large` | the reported disc size exceeds item 6 | the transfer fails |
 | `network-disc-changed` | item 9 | the transfer fails |

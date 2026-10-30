@@ -7,7 +7,8 @@ normative. The outcome vocabulary (reject the image, skip the area, skip or refu
 replace the frame, warn, clamp) is defined in [00-conventions.md](00-conventions.md), 0.8.
 
 Where this document and specifications 1 to 6 disagree, this is an error in the
-specifications; report it. The section references say where each rule is defined.
+specifications; report it. Until it is fixed, the more detailed text of specifications 1 to 6
+prevails over the summary tables here. The section references say where each rule is defined.
 
 ## 7.1 General requirements
 
@@ -17,12 +18,15 @@ specifications; report it. The section references say where each rule is defined
    of the image before making it. No value read from an image may, by itself, make a reader
    allocate more than: 128 sectors for each of the two copies of an area TOC, 65 536 bytes for a frame under assembly,
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
-   length, which 7.5 bounds by the image size.
+   length, which 7.5 bounds by 7 frames of at most `6 x 4704` bytes per existing audio sector
+   (about 100 times the size of the area's audio sectors), and the frames held between delivery
+   and output (specification 4, 4.5 item 5).
 3. A reader MUST terminate on every input, and the work per structure is bounded by
    constants of these specifications: the sub-structure walk takes at most 128 steps per area;
    disc text takes at most 16 strings of at most 4096 bytes; area text at most 4 strings; track
    text at most 255 tracks x 255 items x 4096 bytes per area (tracks may share one item list,
-   so this bound is not proportional to the area TOC size, but it is a constant); sector
+   so this bound is not proportional to the area TOC size, but it is a constant), plus one
+   zero-skipping pass of at most `E` bytes per track; sector
    processing is one pass over the area's existing audio sectors; and DST decoding of a frame is
    proportional to `NB x Nch` plus the frame length.
 4. A reader MUST NOT crash or abort on any input. Errors are reported with the codes of 7.7.
@@ -177,6 +181,8 @@ reported, because processing of the area stops there.
 | `track-past-playtime` | slot, track | a track ends after the area play time; clamped | 3.9.2 |
 | `track-lsn-outside-area` | slot, track | a track start LSN lies outside the audio range | 3.9.2 |
 | `audio-sector-malformed` | slot, LSN | (SHOULD) a malformed audio sector | 4.4.5 |
+| `master-toc-copies-differ` | | (MAY) the master TOC copies at LSN 520 or 530 differ from LSN 510 | 1.5.1 |
+| `sample-frequency-unknown` | slot | (SHOULD) sample frequency code other than 4 | 3.4.2 |
 
 The track reported with a warning is the track **number** (1 to the track count, specification
 3, 3.9.1). A warning of a given code is reported at least once per (slot, track) it applies to. A reader
@@ -185,8 +191,9 @@ MAY report repeated occurrences separately.
 A reader MUST NOT report a code of 7.7.1 to 7.7.3 when its condition does not hold. Warnings
 outside these tables (for example about an unusual sample frequency code) MUST use other
 codes. The corpus therefore compares, for each image that is **not** rejected, the set of
-(code, slot, track) triples a reader reports from 7.7.2 and 7.7.3, other than
-`audio-sector-malformed`, for equality with the expected set. For a rejected image only the
+(code, slot, track) triples a reader reports from 7.7.2 and 7.7.3, other than the optional
+`audio-sector-malformed`, `master-toc-copies-differ` and `sample-frequency-unknown`, for
+equality with the expected set. For a rejected image only the
 error code of 7.7.1 is compared.
 
 ### 7.7.4 Per-track outcomes

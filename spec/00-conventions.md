@@ -10,7 +10,7 @@ MAY and OPTIONAL are to be interpreted as described in RFC 2119 and RFC 8174 whe
 when, they appear in capitals.
 
 A **reader** is an implementation that reads disc images as these specifications describe.
-A reader that satisfies every MUST and MUST NOT in specifications 1 to 5 and 7 is
+A reader that satisfies every MUST and MUST NOT in specifications 0 to 5 and 7 is
 **conforming**. Specification 6 (the PS3 network protocol) is an optional extension: a reader
 that implements it MUST follow it.
 
@@ -36,8 +36,10 @@ that implements it MUST follow it.
 
 5. Offsets are byte offsets from the start of the structure the table describes, written in
    decimal. Ranges `[a, b)` include `a` and exclude `b`; ranges `[a, b]` include both ends.
-6. Bytes that a syntax table does not list, or lists as reserved, MUST be ignored by readers.
-   Their values never change an outcome.
+6. Bytes that a syntax table does not list, or lists as reserved, have no meaning of their
+   own: a reader MUST NOT interpret them as fields. They still take part where a rule works on
+   whole sectors or byte ranges rather than on fields: the comparison of TOC copies (3.2), text
+   strings that start or run into them (2.6.4), and audio sectors (4.2 item 4).
 7. Integer arithmetic on values read from an image MUST NOT overflow. A reader MUST use at
    least 64-bit arithmetic for byte positions (a 32-bit sector number multiplied by a sector
    size exceeds 32 bits).
