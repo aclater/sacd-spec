@@ -16,12 +16,12 @@ The corpus is dedicated to the public domain under CC0 1.0 (see [LICENSE](LICENS
 
 There are two categories:
 
-- **valid** (25 cases): well-formed discs covering the three sector formats, stereo and
+- **valid** (27 cases): well-formed discs covering the three sector formats, stereo and
   multichannel areas, DST and plain DSD, every optional DST syntax feature at 2, 5 and 6
   channels, every character set code (0 to 7), the positions where published CJK mappings
-  disagree, multi-disc set fields, a disc with no text, a disc with every text field, and a
-  TOC-2 fallback.
-- **malformed** (100 cases): one broken thing each, mostly starting from the same small
+  disagree, multi-disc set fields, a disc with no text, a disc with every text field, an area
+  without ISRCs and genres, frame format 3, and a TOC-2 fallback.
+- **malformed** (102 cases): one broken thing each, mostly starting from the same small
   base disc (case `hostile-base`): overlapping, inverted and out-of-image ranges, absurd counts
   and durations, truncated areas and images, garbage, truncated, oversized and invalid DST
   frames, sector-layout confusion, and invalid text encodings.
@@ -170,8 +170,9 @@ For each case:
 4. Compare warnings: the set of (`code`, `area`, `track`) triples the reader reports from
    specification 7, 7.7.2 and 7.7.3, excluding `audio-sector-malformed`, must equal the set in
    `expected.warnings`. Repeated warnings count once.
-5. For each track in `expected.audio`: if the outcome is `skip` or `error`, the reader must
-   produce no audio and report that code; if `ok`, the reader's audio for each channel must
+5. For each track in `expected.audio` (matched by `number`, with `first_frame` and `end_frame`
+   compared too): if the outcome is `skip` (track skipped) or `error` (track refused), the reader
+   must produce no audio and report that code; if `ok`, the reader's audio for each channel must
    hash to the given value. The frame counts are a diagnostic aid: a reader that reports them
    must report these values.
 
@@ -190,5 +191,5 @@ expected value.
 
 ## Size
 
-About 168 MB uncompressed, 125 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
+About 172 MB uncompressed, 129 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
 sectors before the master TOC, which compress well, so the repository stays far smaller.

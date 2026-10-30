@@ -150,7 +150,11 @@ reports as free-text warnings. 7.9 (real-disc survey) from P-SEC.
   to 7, album set, no text, full text, TOC-2 fallback, coded DST in raw layouts, a 5-channel
   plain disc, invalid DST frames inside discs, truncated DST frames, invalid CJK text, and
   (after the first cold read) the CJK table positions where published mappings disagree and DST
-  frames breaking only the arithmetic-code rules.
+  frames breaking only the arithmetic-code rules; and (after the second cold read) an area
+  without `SACD_IGL`, frame format 3, track-text warnings in a skipped area, and a DST frame
+  whose initial code value is 4095. For that last case the expected values of its track were
+  set from specification 5 (0x55 fill, one invalid frame), because pysacd's decoder does not
+  apply rule 17; every other expected value is pysacd's output.
 - Case names of the malformed cases taken from the hostile-image corpus are the names that
   corpus uses, for traceability. The images' own text (for example the catalogue number `PYSACD-TEST`
   and titles naming pysacd) is test data written by that generator, not an identifier used by

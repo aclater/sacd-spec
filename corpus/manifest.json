@@ -10146,7 +10146,7 @@
    "id": "area-tracks-255",
    "category": "malformed",
    "origin": "pysacd hostile-image corpus",
-   "purpose": "Stereo track count 255: 252 extra tracks of zero length, all skipped.",
+   "purpose": "Stereo track count 255: 252 extra tracks of zero length and LSN 0, all skipped, each with a track-lsn-outside-area warning.",
    "input": "corpus/images/area-tracks-255.iso",
    "input_sha256": "ff2835e95a14d38e8fd1c9cb920b85a983489ca0eee74e7463485d3cae12cc2f",
    "input_bytes": 1439744,
@@ -28453,7 +28453,7 @@
    "id": "subchain-trl1-last-sector",
    "category": "malformed",
    "origin": "pysacd hostile-image corpus",
-   "purpose": "The track text sector is relabelled SACDTRL2 and the timecode sector relabelled SACDTRL1, without moving any data: the walk finds both lists (the later SACDTRL1 replaces the real one), so tracks get timecodes and LSNs from the wrong data; they are clamped and skipped.",
+   "purpose": "The track text sector is relabelled SACDTRL2 and the timecode sector relabelled SACDTRL1, without moving any data: the walk finds both lists (the later SACDTRL1 replaces the real one), so tracks get timecodes and LSNs from the wrong data; tracks 1 and 2 run past the play time and are clamped, track 3 already has zero duration, and all three are skipped.",
    "input": "corpus/images/subchain-trl1-last-sector.iso",
    "input_sha256": "af9a8e6579f67e030d22e4b0d82ff161cf852fc156b4c5c987a4e791bcf01ac4",
    "input_bytes": 1439744,
@@ -39249,6 +39249,729 @@
         "sha256": [
          "aa9ce7c207cf2728ce5a1ef39b7515000986a15963c721390e7edab70a88820e",
          "86ef366fb6eacc2094b0b90c9763efa1acd20b752d02c329a196902c2c106181"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "no-igl",
+   "category": "valid",
+   "origin": "new",
+   "purpose": "An area with tracks but no SACD_IGL structure: every track has no ISRC and no genre (null).",
+   "input": "corpus/images/no-igl.iso",
+   "input_sha256": "85c0940f44c3c2cfd557aaa80cc1ad5b056e2711338e9972a3ab4a517da5e6fa",
+   "input_bytes": 1159168,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 566,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "en",
+       "charset": 2
+      }
+     ],
+     "text": {
+      "album_artist": "pysacd synthetic",
+      "album_title": "No SACD_IGL",
+      "disc_artist": "pysacd synthetic",
+      "disc_title": "No SACD_IGL"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 2,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 3,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 559,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 2
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 4,
+         "start_frame": 0,
+         "duration_frames": 1,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": null,
+         "genre": null,
+         "text": {
+          "title": "No ISRC A"
+         }
+        },
+        {
+         "number": 2,
+         "start_lsn": 550,
+         "length_lsn": 10,
+         "start_frame": 1,
+         "duration_frames": 2,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": null,
+         "genre": null,
+         "text": {
+          "title": "No ISRC B"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 1,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "0f695edf604b1e27bccc9d3aaba698b8b678f4582f08c4efc82e475978abfdec",
+         "79c08f00231a481959434b32ccfd779bc9baf28e8da488fb969ec476be715d40"
+        ]
+       },
+       {
+        "number": 2,
+        "first_frame": 1,
+        "end_frame": 3,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "3ff3c5ca308f2ee85e36cea30c9d11fc53bcdc1588e0f15729195b764c2b383c",
+         "60727d6c6220b07d797b25a5b4db4a7aa06973d80a9034f636563dc0857bba5e"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "dsd-3in16-format",
+   "category": "valid",
+   "origin": "new",
+   "purpose": "A plain DSD stereo area whose frame format is 3 (DSD 3 in 16): decoded like any plain area.",
+   "input": "corpus/images/dsd-3in16-format.iso",
+   "input_sha256": "d4d58564216e1b39b68448c1d50ae1abda7eb841259608d3d1fa58a1002ae6e8",
+   "input_bytes": 1159168,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 566,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "en",
+       "charset": 2
+      }
+     ],
+     "text": {
+      "album_artist": "pysacd synthetic",
+      "album_title": "DSD 3 in 16",
+      "disc_artist": "pysacd synthetic",
+      "disc_title": "DSD 3 in 16"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 3,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 3,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 559,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 2
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 14,
+         "start_frame": 0,
+         "duration_frames": 3,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "Three in sixteen"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 3,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "56d9209f4d0de57ff668deef673fd0f1cc8233b1da2cbfb2c7c073abec504a24",
+         "1ee370844814acdc77b915a056faf7e2be39f4fe8757fb559b43c548a51f7a38"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "text-warnings-then-skip",
+   "category": "malformed",
+   "origin": "new",
+   "purpose": "Stereo track text that would warn (unknown item types, an offset past the TOC), in an area later skipped for its missing SACDTRL2: only area-track-list-missing is reported for that slot.",
+   "input": "corpus/images/text-warnings-then-skip.iso",
+   "input_sha256": "5b673541e2d4be6b1a5b8a94bc08a94b15c74f8b65cf96e6e114170274764592",
+   "input_bytes": 1439744,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [
+     {
+      "code": "area-track-list-missing",
+      "area": "2ch"
+     }
+    ],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 703,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "en",
+       "charset": 2
+      }
+     ],
+     "text": {
+      "album_artist": "pysacd synthetic",
+      "album_title": "pysacd hostile base",
+      "disc_artist": "pysacd synthetic",
+      "disc_title": "pysacd hostile base"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "multichannel",
+       "signature": "MULCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 608,
+       "toc_sectors": 6,
+       "max_byte_rate": 2116800,
+       "sample_frequency_code": 4,
+       "frame_format": 2,
+       "channel_count": 6,
+       "area_config": 4,
+       "max_available_channels": 6,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 6,
+       "track_offset": 0,
+       "audio_start_lsn": 614,
+       "audio_end_lsn": 696,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 2
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 614,
+         "length_lsn": 41,
+         "start_frame": 0,
+         "duration_frames": 3,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "Track 1"
+         }
+        },
+        {
+         "number": 2,
+         "start_lsn": 655,
+         "length_lsn": 42,
+         "start_frame": 3,
+         "duration_frames": 3,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600002",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "Track 2"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "multichannel",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 3,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "3b0520e0ea456e5c09da70c286ab046921f7d9f6a1a018c5c06a2bdde8586270",
+         "c251191d7e9302ca14a77c996815baa61d2454a46d4c3dfe1612306d212ab690",
+         "f2665262b2039368779a23b6bd23d7feb57ac5d921df39e62c6b0ef617f9c3ca",
+         "85575d29a6d720ae41f2039b237cf1bfa468c484d8c85d2224d618dfe2a573cd",
+         "fccb80599c7b5317156b87ece948951b9b73056419d19de708aca85b49a182c2",
+         "4675c6cca031e9665841968b0c1b0ba93f242445cd67feac57b7b59530f48e18"
+        ]
+       },
+       {
+        "number": 2,
+        "first_frame": 3,
+        "end_frame": 6,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "b512e2a2bc94bd4726205defcc93af7eb7942642c6699c7ae5b1a1f0387aec53",
+         "902eb207d41b0c3e37b9bb11b01b4a414a390818cc53f3bac7ddb38059a03410",
+         "f4fd8a6648e2eee26786aaa451b2e7481e4c4094cb5107eb30596c3d57bd3cea",
+         "e826185f6a958f89a188586fad2607b2c947acefe6da8b6790154ccc3332288b",
+         "379078a44a455e70cb86ea1db2e2195ebbb2ea88e98843650c34ec7d966acc6e",
+         "245db394a1a143ff724fd75f978e754d5f154ad2a6481f4b063b25789473974d"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "dst-code-all-ones",
+   "category": "malformed",
+   "origin": "new",
+   "purpose": "Track 2 is one DST frame whose code bits cb[1] to cb[12] are all 1 (DST rule code-out-of-range): it is invalid and filled with 0x55. Tracks 1 and 3 are valid coded frames.",
+   "input": "corpus/images/dst-code-all-ones.iso",
+   "input_sha256": "8567d5392304edc69bb6f89265b8051fab43442ad0fb99ac94a7065ccb46e90f",
+   "input_bytes": 1148928,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 561,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "en",
+       "charset": 2
+      }
+     ],
+     "text": {
+      "album_artist": "pysacd synthetic",
+      "album_title": "DST code all ones",
+      "disc_artist": "pysacd synthetic",
+      "disc_title": "DST code all ones"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 0,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 5,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 554,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 2
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 3,
+         "start_frame": 0,
+         "duration_frames": 2,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "Before"
+         }
+        },
+        {
+         "number": 2,
+         "start_lsn": 549,
+         "length_lsn": 2,
+         "start_frame": 2,
+         "duration_frames": 1,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600002",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "All-ones code"
+         }
+        },
+        {
+         "number": 3,
+         "start_lsn": 551,
+         "length_lsn": 4,
+         "start_frame": 3,
+         "duration_frames": 2,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600003",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "After"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 2,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "3d9d87ef1c72895d08e560d04b610b6a71cca43cb7855405168f41b8d68e6067",
+         "4f18565f5db0d545ccae0169ba8053e23b7c9473dc50f14a79e40175d2dbb3c3"
+        ]
+       },
+       {
+        "number": 2,
+        "first_frame": 2,
+        "end_frame": 3,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 1,
+        "sha256": [
+         "cf3c49de32901ef40f0de66ec81057fc40220ab75f02c78d57072cf7e03bfccd",
+         "cf3c49de32901ef40f0de66ec81057fc40220ab75f02c78d57072cf7e03bfccd"
+        ]
+       },
+       {
+        "number": 3,
+        "first_frame": 3,
+        "end_frame": 5,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "8e1bc1c9ee05127c6f035ab5499806797e33df3303a751c813dea4504ba1d963",
+         "5a8b885af2849a263d4c6820ecaa27e94c36def33bbc70f34c31a9155e4a3dda"
         ]
        }
       ]
