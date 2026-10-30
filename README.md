@@ -66,7 +66,8 @@ and deterministic: two conforming readers produce the same TOC, the same require
 the same audio for every image, with these stated exceptions, none of which the corpus
 exercises: a sector format chosen by the caller instead of detected (specification 1, 1.4),
 and optional (SHOULD) warnings. Frame counts
-are optional to report, but a reader that reports them reports the same values. Points that could not be specified with full confidence are listed in
+are recommended (SHOULD) rather than required, and a reader that reports them reports the same
+values. Points that could not be specified with full confidence are listed in
 [PROVENANCE.md](PROVENANCE.md#open-points).
 
 ## Licences

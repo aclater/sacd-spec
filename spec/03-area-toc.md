@@ -132,7 +132,7 @@ Sector 0 of `Z`:
    | 2 | DSD 3 in 14 | plain DSD (the name describes how 2-channel frames are packed; the code is also used, and valid, for multichannel areas) |
    | 3 | DSD 3 in 16 | plain DSD |
 
-   Other values are reported as stored and are not an error.
+   Other values of these low 4 bits are reported (as the low 4 bits) and are not an error.
 2. The frame format is **informative**. Whether a given frame is DST-coded or plain is decided
    by the audio sector that starts it (specification 4, 4.3), not by this field. A reader MUST
    decode audio by the sector flag even when it contradicts the frame format.
