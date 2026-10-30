@@ -16,7 +16,8 @@ The corpus is dedicated to the public domain under CC0 1.0 (see [LICENSE](LICENS
 
 There are two categories:
 
-- **valid** (27 cases): well-formed discs covering the three sector formats, stereo and
+- **valid** (27 cases): discs a reader accepts in full, some with deliberate oddities (text
+  that decodes to U+FFFD, a TOC-2 fallback with its warning), covering the three sector formats, stereo and
   multichannel areas, DST and plain DSD, every optional DST syntax feature at 2, 5 and 6
   channels, every character set code (0 to 7), the positions where published CJK mappings
   disagree, multi-disc set fields, a disc with no text, a disc with every text field, an area
