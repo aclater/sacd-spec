@@ -108,7 +108,7 @@ its diagnostic code.
 | Outcome | Meaning |
 |---|---|
 | **reject the image** | The reader reports an error with the stated **error code** and produces no TOC and no audio. Whether it also reports warnings it emitted before the rejection is not specified, and the corpus does not compare them. |
-| **skip the area** | The area is left out of the TOC and produces no audio. The reader emits a warning with the stated code and continues with the other area. Warnings already emitted for the area before it was skipped (for example `area-toc1-unreadable` or `track-text-type-unknown`) remain reported. |
+| **skip the area** | The area is left out of the TOC and produces no audio. The reader emits a warning with the stated code and continues with the other area. Warnings about the area as a whole that were emitted before it was skipped (`area-toc1-unreadable`, `area-toc2-unreadable`, `area-toc-copies-differ`) remain reported; warnings about its tracks (codes beginning `track-`) are never reported for a skipped area (specification 3, 3.1 item 5). |
 | **skip the track** | The track remains in the TOC, but the reader produces no audio for it and reports the stated code for it. |
 | **refuse the track** | As "skip the track", but the condition is an error rather than an empty track. Specification 7 says which codes are which. |
 | **replace the frame** | One audio frame is replaced by a fill pattern (0.6). Neighbouring frames are unaffected. |

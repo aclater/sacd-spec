@@ -58,7 +58,8 @@ A message is a sequence of fields. Each field starts with a **key**, a varint wh
 | 5 | 4 bytes, little-endian |
 
 Field numbers are 1 or more, so no key is 0; a key byte of 0x00 is therefore the end-of-message
-marker of 6.2. This protocol's messages use wire types 0 and 2 only. A receiver:
+marker of 6.2. Any other key whose field number is 0 (a key of value 1 to 7, or a value-0 key
+written in more than one byte, such as 0x80 0x00) is a protocol error. This protocol's messages use wire types 0 and 2 only. A receiver:
 
 1. MUST skip fields of wire types 1 and 5 and fields with field numbers it does not know (after
    reading their payload, which counts towards the limits of 6.7);
@@ -92,7 +93,8 @@ marker of 6.2. This protocol's messages use wire types 0 and 2 only. A receiver:
 | 3 | 2 | data | bytes | read responses only: the sectors read |
 
 A field that is absent has its default value: 0 for result, empty for data. A response without
-a response type field is a protocol error.
+a response type field is a protocol error. A data field in a response other than a read
+response is ignored.
 
 ## 6.4 Requests and responses
 
@@ -138,11 +140,12 @@ Consequences that clients MUST handle:
    repeat the request for the remainder until it has them all.
 2. On a single-area disc, an offset after the audio area matches no row, so the block size
    is whatever the previous request left. On a new connection that is 0, and every such read
-   returns `r = 0`, forever. A client MUST therefore make a read that matches a row (for
-   example one sector at LSN 0, or the master TOC at LSN 510) as its first read on every
-   connection, before reading anything after the audio area.
-3. A result of 0 sectors is never progress. A client MUST treat it as an error (6.7 item 5),
-   never retry it on the same connection without first making a read that sets the block size.
+   returns `r = 0`, forever. A client MUST therefore make, as its first read on every
+   connection, a read of one sector at **LSN 0**. LSN 0 always matches a row: the first row if
+   `s1 > 0`, the second if `s1 = 0`. (A read at LSN 510 does not always match: on a disc whose
+   only audio area ends before LSN 510 it matches no row.)
+3. A client that follows item 2 never receives `r = 0` from a correct server. A result of 0 is
+   therefore a protocol error (6.7 item 5).
 
 When an encrypted range is first read, the server checks whether the disc is protected at all
 (some plain DSD discs are not) by examining bytes 16 to 23 of the first block. This affects
@@ -155,7 +158,8 @@ A typical client session:
 1. Connect to port 2002.
 2. Send open disc; require result 0.
 3. Send get disc size; require a result of 1 or more.
-4. Read the master TOC (LSN 510, 10 sectors). This also sets the block size (6.5 item 2).
+4. Read one sector at LSN 0 (this sets the block size, 6.5 item 2), then the master TOC
+   (LSN 510, 10 sectors).
 5. Read the area TOCs and audio sectors it needs, looping on short reads.
 6. Send close disc; the server closes the connection.
 
@@ -188,7 +192,7 @@ specification reports them with these codes (in addition to those of specificati
 |---|---|---|
 | `network-connection-lost` | the connection could not be made, was closed by the server, or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
 | `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), or a response of the wrong type | the transfer fails; the client MUST NOT reconnect to retry it |
-| `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result of -1 | the transfer fails; the client MAY report the result value |
+| `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result below 0 (this row takes precedence over item 5 for negative read results) | the transfer fails; the client MAY report the result value |
 | `network-disc-too-large` | the reported disc size exceeds item 6 | the transfer fails |
 | `network-disc-changed` | item 9 | the transfer fails |
 
@@ -205,7 +209,10 @@ A server that serves an image file for testing SHOULD:
 2. never read outside the served image, whatever a request says;
 3. close connections that stay idle for a bounded time (60 s RECOMMENDED), so one silent client
    cannot hold the single connection forever;
-4. listen on the loopback interface unless told otherwise.
+4. listen on the loopback interface unless told otherwise;
+5. when the served file is a raw 2054- or 2064-byte image, serve its logical sectors (the 2048
+   data bytes of each stored sector, specification 1, 1.3) and report its `N` as the disc
+   size.
 
 ## 6.9 Limits
 
