@@ -23,8 +23,8 @@ here are in [03-area-toc.md](03-area-toc.md).
 
 1. Let `N` be the number of sectors in the image (specification 1, 1.3) and
    `S1' = min(S1, N - 1)`.
-2. The reader processes the logical sectors `S0, S0 + 1, ..., S1'` in increasing LSN order,
-   each exactly once. If `S0 > S1'` no sector is processed.
+2. The result is defined as if the reader processes the logical sectors
+   `S0, S0 + 1, ..., S1'` in increasing LSN order, each exactly once. If `S0 > S1'` no sector is processed.
 3. Sectors past the end of the image are not an error: frames they would have carried are
    missing (4.5 item 3, 4.6).
 4. The sectors in that range are processed as audio sectors whatever they contain. If the range
@@ -35,8 +35,9 @@ here are in [03-area-toc.md](03-area-toc.md).
    (4.5 item 4 gives one such case). The track start LSNs of specification 3 MUST NOT change
    the result: a reader that uses them to seek MUST still produce exactly the frames this
    specification defines.
-6. A reader MAY process the sectors of an area more than once, for example once per track;
-   every pass gives the same frames (4.4.5 item 2, specification 7, 7.1 item 3).
+6. A reader MAY process the sectors of an area more than once, for example once per track.
+   Every complete pass gives the same frames, because 4.4 and 4.5 depend only on the sectors
+   and their order. Specification 7, 7.1 item 3 bounds the number of passes.
 
 ## 4.3 Audio sector syntax
 
@@ -175,7 +176,8 @@ number. The reader keeps a **next acceptable frame number** `a`, starting at 0 f
    delivers a frame with number `t >= u`: the result for positions below `u` is the same.
 5. Frames held between delivery and output need memory. A reader MUST bound it: an accepted
    frame is at most 65 536 bytes before decoding and `C x 4704` bytes after, and only frames
-   inside a track or frame range (4.7.1) that is still to be produced need to be kept.
+   inside a track or frame range (4.7.1) that is still to be produced need to be kept. A reader
+   that produces the stored frame list (4.6.1 item 2) need keep only the frame it is delivering.
 
 ## 4.6 Frame contents
 
@@ -201,11 +203,21 @@ unchanged into a file format that carries them.
    - **plain**, with the `C x 4704` bytes of the accepted plain frame (4.4.2);
    - **missing**, when no frame was accepted at `t` (4.5 item 3).
 
-   These are exactly the frames 4.4 and 4.5 accept; nothing is decoded. A reader that offers
-   stored content counts missing positions as 4.6 does. It does not report invalid DST frames,
-   because validity (specification 5, 5.6) is known only by decoding. The checks of 4.8 item 1
-   apply: no stored content is offered for an area whose channel count is not 1 to 6.
-2. Each position has a **DST equivalent**: a DST frame (specification 5) that decodes with
+   These are exactly the frames 4.4 and 4.5 accept; nothing is decoded. No stored content is
+   offered for an area whose channel count is not 1 to 6 (4.8 item 1).
+2. A reader offers stored content in one or both of these forms:
+   - **The area's stored frame list:** every accepted frame of the area, in frame number
+     order, with its frame number. It is defined by processing every sector of 4.2, with no
+     early stop (4.2 item 5 does not apply), and it includes frames numbered `P` or more.
+     Positions not in the list are missing. The list holds at most 7 frames per existing audio
+     sector, because a sector can start at most 7 frames.
+   - **The stored content of a track or frame range** `[a, b)` (4.7, 4.7.1): the stored content
+     of each position from `a` to `b - 1`. The checks of 4.8 (or 4.7.1 item 4) apply first: a
+     track or range they skip or refuse has no stored content, with the same code. Otherwise
+     the reader SHOULD report how many of its positions are missing (4.7.1 item 6). It does
+     not report invalid DST frames, because validity (specification 5, 5.6) is known only by
+     decoding.
+3. Each position has a **DST equivalent**: a DST frame (specification 5) that decodes with
    `Nch = C` to exactly the content 4.6 gives the position.
    - For DST, it is the stored bytes.
    - For plain, it is the byte 0x00 followed by the stored bytes.
@@ -213,10 +225,11 @@ unchanged into a file format that carries them.
 
    The byte 0x00 is a plain DST frame header (`DST_coded` = 0, stuffing 0), so by
    specification 5, 5.2.1 item 2 the frame decodes to the bytes that follow it.
-3. A reader that writes the DST equivalents of a track's or a frame range's positions produces
+4. A reader that writes the DST equivalents of a track's or a frame range's positions produces
    output whose decoding (specification 5, then 4.7 item 2) is exactly that track's or range's
-   audio.
-4. Informative: an invalid DST frame's stored bytes decode, by 4.6, to the 0x55 fill. Decoders
+   audio. A track or range that the checks of 4.8 skip or refuse has no DST equivalents written
+   (item 2), so they cannot be used to produce fill beyond the area's capacity.
+5. Informative: an invalid DST frame's stored bytes decode, by 4.6, to the 0x55 fill. Decoders
    outside these specifications may treat such frames differently (specification 5, 5.8
    item 1). A reader that writes DST equivalents for such a decoder MAY decode each DST frame
    and, if it is invalid, write the byte 0x00 followed by `C x 4704` bytes of 0x55 instead,
