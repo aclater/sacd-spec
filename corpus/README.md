@@ -1,0 +1,197 @@
+# Conformance corpus
+
+This directory holds synthetic SACD disc images and, in `manifest.json`, what a conforming
+reader must produce from each: the TOC, the warnings, and a hash of every track's decoded DSD
+per channel, or the error that rejects the image.
+
+The images are synthetic. They contain generated test signals, never audio from a real disc.
+The corpus is dedicated to the public domain under CC0 1.0 (see [LICENSE](LICENSE)).
+
+## Contents
+
+| Path | Content |
+|---|---|
+| `manifest.json` | one entry per case (schema below) |
+| `images/<id>.iso` | the input image of case `<id>`, uncompressed |
+
+There are two categories:
+
+- **valid** (23 cases): well-formed discs covering the three sector formats, stereo and
+  multichannel areas, DST and plain DSD, every optional DST syntax feature at 2, 5 and 6
+  channels, every character set code (0 to 7), multi-disc set fields, a disc with no text, a
+  disc with every text field, and a TOC-2 fallback.
+- **malformed** (99 cases): one broken thing each, mostly starting from the same small
+  base disc (case `hostile-base`): overlapping, inverted and out-of-image ranges, absurd counts
+  and durations, truncated areas and images, garbage, truncated, oversized and invalid DST
+  frames, sector-layout confusion, and invalid text encodings.
+
+Each case's `purpose` says what it exercises and why its outcome is what it is.
+
+## Manifest schema
+
+The top level is an object:
+
+| Key | Type | Meaning |
+|---|---|---|
+| `format` | string | `sacd-spec conformance manifest` |
+| `format_version` | integer | 1 |
+| `spec_version` | string | version of the specifications the expectations follow |
+| `license` | string | `CC0-1.0` |
+| `cases` | array | one object per case |
+
+### Case object
+
+| Key | Type | Meaning |
+|---|---|---|
+| `id` | string | unique name; the image is `images/<id>.iso` |
+| `category` | string | `valid` or `malformed` |
+| `origin` | string | `pysacd hostile-image corpus` for cases taken from that corpus, `new` for cases added for this repository |
+| `purpose` | string | what the case exercises |
+| `input` | string | path of the image, relative to the repository root |
+| `input_sha256` | string | SHA-256 of the image file, lower-case hex |
+| `input_bytes` | integer | size of the image file in bytes |
+| `frames` | array, optional | for DST cases, what each frame of an area contains (below) |
+| `expected` | object | the expected result (below) |
+
+`frames` entries are informative: `area` (slot), `frame` (frame number), `content` (prose),
+and for the invalid-frame cases `dst_valid` (whether the frame is valid under
+[specification 5](../spec/05-dst.md)). The rule names in `content` are those of
+specification 5, section 5.6.
+
+### Expected result
+
+| Key | Type | Meaning |
+|---|---|---|
+| `outcome` | string | `ok`, or `reject` if the image is rejected |
+| `error` | string or null | for `reject`, the error code ([specification 7](../spec/07-validation-and-limits.md), 7.7.1) |
+| `warnings` | array | the expected warnings (below); empty for `reject` |
+| `toc` | object or null | the expected TOC (below); null for `reject` |
+| `audio` | array | per area, the expected track audio (below); empty for `reject` |
+
+A warning is an object with `code` (specification 7, 7.7.2 or 7.7.3), `area` (the slot, `2ch`
+or `multichannel`, when the code concerns an area) and `track` (the track number, when it
+concerns a track).
+
+### TOC object
+
+Disc level (specification 2):
+
+| Key | Spec | Meaning |
+|---|---|---|
+| `sector_size` | 1.2 | stored sector size `P`: 2048, 2054 or 2064 |
+| `sectors` | 1.3 | `N`, the number of sectors in the image |
+| `version` | 2.3 | [major, minor] |
+| `album_set_size`, `album_sequence_number` | 2.3.1 | as stored |
+| `album_catalog_number`, `disc_catalog_number` | 2.6.5 | fixed text fields (may be empty) |
+| `album_genres`, `disc_genres` | 2.4 | 4 objects each, `{category, genre}` |
+| `hybrid` | 2.3 | boolean, bit 7 of offset 80 |
+| `date` | 2.3.2 | `{year, month, day}` as stored |
+| `locales` | 2.5.2 | reported list of `{language, charset}`; `charset` is the stored byte |
+| `text` | 2.5.4 | object mapping item names to strings; absent items are left out |
+| `manufacturer_sector` | 2.7 | boolean, whether `SACD_Man` is present |
+| `areas` | 3.1 | the areas in slot order |
+
+Disc text item names: `album_title`, `album_artist`, `album_publisher`, `album_copyright`,
+`album_title_phonetic`, `album_artist_phonetic`, `album_publisher_phonetic`,
+`album_copyright_phonetic`, and the same eight with `disc_` instead of `album_`.
+
+Area object (specification 3):
+
+| Key | Spec | Meaning |
+|---|---|---|
+| `slot` | 3.1 | `2ch` or `multichannel`: which master TOC slot the area came from |
+| `signature` | 3.3 | `TWOCHTOC` or `MULCHTOC` |
+| `version` | 3.3 | [major, minor] |
+| `toc_lsn` | 3.2 | LSN of the copy used (TOC-1 or TOC-2) |
+| `toc_sectors` | 3.2 | area TOC size from the master TOC |
+| `max_byte_rate` | 3.3 | as stored |
+| `sample_frequency_code` | 3.4.2 | as stored |
+| `frame_format` | 3.4.2 | low 4 bits of offset 21 |
+| `channel_count` | 3.4.1 | as stored |
+| `area_config` | 3.4.1 | the whole byte at offset 33 |
+| `max_available_channels`, `area_mute_flags` | 3.3 | as stored |
+| `track_attribute` | 3.3 | low 4 bits of offset 48 |
+| `playtime_frames` | 3.3 | frame number of the total play time |
+| `track_offset` | 3.3 | as stored |
+| `audio_start_lsn`, `audio_end_lsn` | 3.3 | as stored |
+| `locales` | 3.5 | reported list of `{language, charset}` |
+| `text` | 3.6 | object with `description`, `copyright`, `description_phonetic`, `copyright_phonetic` when present |
+| `tracks` | 3.9 | array of track objects |
+
+Track object:
+
+| Key | Spec | Meaning |
+|---|---|---|
+| `number` | 3.9.1 | 1-based |
+| `start_lsn`, `length_lsn` | 3.7.1 | as stored |
+| `start_frame`, `duration_frames` | 3.7.2, 3.9.2 | frame numbers **after** clamping |
+| `start_flags`, `duration_flags` | 3.7.2 | the fourth byte of each timecode entry |
+| `isrc` | 3.7.3 | string, or null for no ISRC |
+| `genre` | 3.7.3 | `{category, genre}`, or null when the area has no `SACD_IGL` |
+| `text` | 3.8 | object mapping item names to strings: `title`, `performer`, `songwriter`, `composer`, `arranger`, `message`, `extra_message`, and each with `_phonetic` appended |
+
+### Audio array
+
+One object per area, in the order of `toc.areas`:
+
+| Key | Meaning |
+|---|---|
+| `area` | the slot |
+| `tracks` | one object per track of the area, in track order |
+
+Track audio object ([specification 4](../spec/04-audio-multiplexing.md)):
+
+| Key | Meaning |
+|---|---|
+| `number` | track number |
+| `first_frame`, `end_frame` | the frame range `[first_frame, end_frame)` of 4.7 |
+| `outcome` | `ok`, `skip` (track skipped) or `error` (track refused) |
+| `error` | for `skip` and `error`, the code of 4.8 / 7.7.4 |
+| `missing_frames` | for `ok`, how many frames of the range were missing (filled with 0x69) |
+| `invalid_dst_frames` | for `ok`, how many frames of the range were invalid DST frames (filled with 0x55) |
+| `sha256` | for `ok`, one SHA-256 (lower-case hex) per channel, in channel order, of that channel's track audio (4.7 item 2): `(end_frame - first_frame) x 4704` bytes, DSD bytes with the earliest sample in the MSB |
+
+## How to check a reader
+
+For each case:
+
+1. Verify the image's SHA-256 against `input_sha256`.
+2. Read the image. If `expected.outcome` is `reject`, the reader must reject it with
+   `expected.error`, and must not produce a TOC.
+3. Otherwise compare the reader's TOC with `expected.toc`:
+   - every key listed above must be present with an equal value;
+   - for text objects, the set of present items must be equal, and each string must be equal,
+     except for strings containing U+FFFD (below).
+4. Compare warnings: the set of (`code`, `area`, `track`) triples the reader reports from
+   specification 7, 7.7.1 to 7.7.3, excluding `audio-sector-malformed`, must equal the set in
+   `expected.warnings`. (Repeated warnings count once.)
+5. For each track in `expected.audio`: if the outcome is `skip` or `error`, the reader must
+   produce no audio and report that code; if `ok`, the reader's audio for each channel must
+   hash to the given value. The frame counts are a diagnostic aid: a reader that reports them
+   must report these values.
+
+**Strings containing U+FFFD.** How many replacement characters an invalid byte sequence
+produces is implementation-defined (specification 2, 2.6.3). For an expected string that
+contains U+FFFD, the reader's string must contain U+FFFD, and its part before its first U+FFFD
+must equal the expected string's part before its first U+FFFD. Nothing after it is compared.
+Only the cases with deliberately invalid text (`master-charset-sjis-garbage`,
+`text-sjis-garbage`, `text-invalid-euckr`, `text-invalid-gb2312`, `text-invalid-big5`) contain
+such strings.
+
+## How the corpus was made
+
+The images were built with the synthetic-image generator and the test DST encoder of pysacd
+(a GPL-licensed SACD toolkit), which are not part of this repository. The expected values were
+computed with pysacd's TOC reader and decoding engine, configured to follow these
+specifications where its command-line tools differ (whole-area scan clipped to the image,
+per-track capacity check, zero-length tracks skipped). The DST feature cases were also checked
+against the encoder's input signal: their decoded DSD equals the signal that was encoded.
+[PROVENANCE.md](../PROVENANCE.md) records the details.
+
+Implementations must not depend on how the corpus was made: the specifications define every
+expected value.
+
+## Size
+
+About 165 MB uncompressed, 122 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
+sectors before the master TOC, which compress well, so the repository stays far smaller.
