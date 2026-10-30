@@ -146,8 +146,8 @@ The bounds that keep decoding safe:
 
 | Code | Condition | Spec |
 |---|---|---|
-| `not-scarletbook` | no `SACDMTOC` at LSN 510 in any sector format | 1.4, 2.2 |
-| `master-toc-truncated` | the image ends before LSN 519 is complete | 2.2 |
+| `not-scarletbook` | no `SACDMTOC` at LSN 510 in any sector format (or in the format a caller chose); over the network, a disc size of at most 510 sectors | 1.4, 2.2, 6.7 |
+| `master-toc-truncated` | the image ends before LSN 519 is complete; over the network, a disc size of 511 to 519 sectors | 2.2, 6.7 |
 | `master-toc-version-unsupported` | master TOC version major above 1 | 2.2 |
 | `no-audio-areas` | no area slot yields an area | 3.1 |
 

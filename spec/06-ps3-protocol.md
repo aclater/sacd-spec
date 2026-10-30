@@ -188,20 +188,24 @@ A client MUST treat the server as hostile. In particular:
 
 | No. | Requirement | Value |
 |---|---|---|
-| 1 | Bound every length-delimited field before allocating for it. A field longer than one full read plus a margin is a protocol error. | 512 x 2048 + 1024 = 1 049 600 bytes |
+| 1 | Bound every length-delimited field before allocating for it: a field whose length prefix (the varint `n` of 6.3.2, not counting the key or the prefix itself) exceeds one full read plus a margin is a protocol error. | `n` at most 512 x 2048 + 1024 = 1 049 600 |
 | 2 | Bound the number of fields in one message, counting every field read, skipped ones included. More is a protocol error. | 16 fields |
 | 3 | Reject a varint longer than 10 bytes, or a 10-byte varint whose value exceeds 64 bits. | |
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
 | 5 | A client MUST NOT send a read with `n = 0`. For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
 | 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. On a missed deadline the client MUST close the connection; late bytes are never read. Connecting and sending a request MUST also be bounded in time; failing either is `network-connection-lost`. | 60 s RECOMMENDED for each |
-| 8 | Bound reconnection attempts. The count of attempts in a row restarts at 0 after any response that passes every check. | 3 in a row RECOMMENDED, with back-off |
-| 9 | After a reconnection, before any other read, the client MUST on the new connection: open the disc, get the disc size, read one sector at LSN 0, and, if the disc size is at least 520 and the master TOC was **fully** received on an earlier connection of the same transfer, read LSN 510 to 519 again. It then compares the disc size, if it was obtained before, and the master TOC sectors, if they were fully received before (a partly received master TOC is not a baseline). If any of these differs, the disc changed and the transfer (the sequence of reads the client was making) MUST fail with `network-disc-changed`. What was never obtained is not compared. | |
-| 10 | Apply specifications 1 to 4 and 7 to the sectors received as to a plain-format image file of `N` sectors, `N` being the reported disc size, with these differences: no format detection is run (the format is plain), and the client MUST NOT request any sector at or past `N`. So if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC (these outcomes can differ from those of a file of the same length, whose detection reads the bytes at LSN 510); every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
+| 8 | Bound reconnection attempts. A reconnection attempt is every connection opened after the first one of a transfer. The count restarts at 0 only when a read returns at least one sector the transfer needed and had not yet received (responses to the open, size and priming requests of item 9 do not restart it), so the total number of connections of a transfer is bounded. | at most 3 attempts without progress RECOMMENDED, with back-off |
+| 9 | On every connection, the first three requests MUST be open disc, get disc size, and a read of one sector at LSN 0, in that order. After a reconnection, if all ten master TOC sectors (LSN 510 to 519) had been received during the transfer (on one or several earlier connections), the client then reads LSN 510 to 519 again before any other read. It compares the disc size with the size obtained on the transfer's first connection, and the master TOC sectors, if all ten had been received, with those received first. If any of these differs, the disc changed and the transfer (the sequence of reads the client was making) MUST fail with `network-disc-changed`. What was never obtained is not compared. | |
+| 10 | Apply specifications 1 to 5 and 7 to the sectors received as to a plain-format image file of `N` sectors, `N` being the reported disc size, with these differences: no format detection is run (the format is plain), and the client MUST NOT request any sector at or past `N`. So if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC (these outcomes can differ from those of a file of the same length, whose detection reads the bytes at LSN 510); every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
 
 ### 6.7.1 Error outcomes
 
-Every failure of a client falls into one of these classes. A response is checked in this order,
+Every failure of a client falls into one of these classes. When the connection is lost, or a
+deadline is missed, while a response is being received, the client first decodes the part
+already received: if that part already violates 6.2, 6.3 or items 1 to 3, the class is
+`network-protocol-error`; otherwise it is `network-connection-lost`. A complete response is
+checked in this order,
 and the first failing check decides the class: (1) the message can be decoded (6.2, 6.3, items
 1 to 3), else `network-protocol-error`; (2) its type matches the request (item 4), else
 `network-protocol-error`; (3) its result is not a failure result, else `network-disc-error`, where a failure result is

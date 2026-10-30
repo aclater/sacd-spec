@@ -192,8 +192,8 @@ its neighbours.
 4. Frames between the end of one track and the start of the next (pauses), and frames outside
    every track, belong to no track. Informative: a reader that offers "tracks with pauses"
    attaches each pause to the track before it: the first track starts at frame 0 instead of
-   its own start, every other track keeps its own start, and every track ends at the next
-   track's start (the last track at the play time) instead of at its own end, but never before
+   its own start, every other track keeps its own start, and every track ends at the start of
+   the track with the next number (the last track at the play time) instead of at its own end, but never before
    its own end. The corpus checks only the ranges of item 1.
 
 ## 4.8 When no audio is produced
