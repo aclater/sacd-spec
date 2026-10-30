@@ -162,9 +162,9 @@ Consequences that clients MUST handle:
 Some plain DSD discs have no protection; the server detects this itself. It does not change
 the bytes sent.
 
-## 6.6 Session
+## 6.6 Session (informative)
 
-A typical client session:
+A typical client session; the requirements it relies on are those of 6.5 and 6.7:
 
 1. Connect to port 2002.
 2. Send open disc; require result 0.
@@ -187,11 +187,11 @@ A client MUST treat the server as hostile. In particular:
 | 2 | Bound the number of fields in one message, counting every field read, skipped ones included. More is a protocol error. | 16 fields |
 | 3 | Reject a varint longer than 10 bytes, or a 10-byte varint whose value exceeds 64 bits. | |
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
-| 5 | For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
+| 5 | A client MUST NOT send a read with `n = 0`. For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
 | 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. On a missed deadline the client MUST close the connection; late bytes are never read. Connecting and sending a request MUST also be bounded in time; failing either is `network-connection-lost`. | 60 s RECOMMENDED for each |
-| 8 | Bound reconnection attempts. | 3 in a row RECOMMENDED, with back-off |
-| 9 | After a reconnection, check that the disc size and the master TOC sectors (LSN 510 to 519) are unchanged; if not, the disc changed and the transfer in progress (the sequence of reads the client was making) MUST fail with `network-disc-changed`. If the earlier connection never obtained the disc size and the master TOC, there is nothing to compare: the reconnection simply starts the transfer again. | |
+| 8 | Bound reconnection attempts. The count of attempts in a row restarts at 0 after any response that passes every check. | 3 in a row RECOMMENDED, with back-off |
+| 9 | After a reconnection, compare what the client already knows from earlier connections of the same transfer with what the new connection reports: the disc size, if it was obtained before, and the master TOC sectors (LSN 510 to 519), if they were received before. If any of these differs, the disc changed and the transfer (the sequence of reads the client was making) MUST fail with `network-disc-changed`. What was never obtained is not compared. | |
 | 10 | Apply specifications 1 to 4 and 7 to the sectors received as to a plain-format image file of `N` sectors, `N` being the reported disc size, with these differences: no format detection is run (the format is plain), and the client MUST NOT request any sector at or past `N`. So if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC (these outcomes can differ from those of a file of the same length, whose detection reads the bytes at LSN 510); every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
 
 ### 6.7.1 Error outcomes
@@ -200,22 +200,33 @@ Every failure of a client falls into one of these classes. A response is checked
 and the first failing check decides the class: (1) the message can be decoded (6.2, 6.3, items
 1 to 3), else `network-protocol-error`; (2) its type matches the request (item 4), else
 `network-protocol-error`; (3) its result is not negative where 6.4 defines a failure result,
-else `network-disc-error`; (4) item 5 (for reads) and item 6 (for disc size). A close response
-that fails any check after every needed sector has been received is reported, but does not make
-the transfer fail. A reader that implements this
+else `network-disc-error`, where a failure result is any result the `network-disc-error` row
+below names (for open, any result other than 0; for get disc size, any result below 1; for a
+read, any result below 0); (4) item 5 (for reads) and item 6 (for disc size).
+
+The close disc request is a courtesy: a client SHOULD send it when it has received every sector
+it needs, but its response is not checked, and whether it arrives, is malformed or carries any
+result never changes the outcome of the transfer.
+
+A conforming server sends nothing but one response per request. If a server sends other bytes
+(for example after a response's terminating 0x00), which messages a client then decodes depends
+on timing, and the outcome is **not specified**, except that every bound of this section still
+applies. A reader that implements this
 specification reports them with these codes (in addition to those of specification 7):
 
 | Code | Condition | Outcome |
 |---|---|---|
 | `network-connection-lost` | the connection could not be made, was closed by the server (including in the middle of a message), or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
-| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), a response of the wrong type, or bytes received after a response's terminating 0x00 (a client MUST check, after decoding each response, that no further bytes have already been received; it is not required to wait or poll for more) | the transfer fails; the client MUST NOT reconnect to retry it |
+| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), or a response of the wrong type | the transfer fails; the client MUST NOT reconnect to retry it |
 | `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result below 0 | the transfer fails; the client MAY report the result value |
 | `network-disc-too-large` | the reported disc size exceeds item 6 | the transfer fails |
 | `network-disc-changed` | item 9 | the transfer fails |
 
 A **transfer** is the sequence of requests a client makes to obtain the sectors it needs (for
 example the whole disc, or the TOCs and one area). When a transfer fails, any sectors already
-received MUST NOT be presented as a complete image.
+received MUST NOT be presented as a complete image, and the failure MUST be reported. A reader
+MAY keep results (a TOC, finished tracks) that it had already completed from sectors fully
+received before the failure.
 
 ## 6.8 Test servers (informative)
 

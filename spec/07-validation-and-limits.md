@@ -71,7 +71,7 @@ prevails over the summary tables here. The section references say where each rul
 | Area signature | `TWOCHTOC` or `MULCHTOC` | anything else | `area-signature-invalid` (skip the area) | 3.3 |
 | Area kind versus slot | any combination | | | 3.1 |
 | Area version | any | not validated | | 3.3 |
-| Sample frequency code | 4 | others reported; audio still DSD64 | SHOULD warn (no code required) | 3.4.2 |
+| Sample frequency code | 4 | others reported; audio still DSD64 | `sample-frequency-unknown` (SHOULD warn) | 3.4.2 |
 | Frame format | 0, 2, 3 | others reported; not used for decoding | | 3.4.2 |
 | Channel count | 1 to 6 for audio | others: TOC reported, no audio | `channel-count-unsupported` (refuse each track) | 3.4.1, 4.8 |
 | Loudspeaker configuration | any | reported | | 3.4.1 |
@@ -181,7 +181,7 @@ reported, because processing of the area stops there.
 | `track-past-playtime` | slot, track | a track ends after the area play time; clamped | 3.9.2 |
 | `track-lsn-outside-area` | slot, track | a track start LSN lies outside the audio range | 3.9.2 |
 | `audio-sector-malformed` | slot, LSN | (SHOULD) a malformed audio sector | 4.4.5 |
-| `master-toc-copies-differ` | | (MAY) the master TOC copies at LSN 520 or 530 differ from LSN 510 | 1.5.1 |
+| `master-toc-copies-differ` | | (MAY) a master TOC copy at LSN 520 or 530 that can be read in full differs from LSN 510 (a copy that cannot be read is not compared) | 1.5.1 |
 | `sample-frequency-unknown` | slot | (SHOULD) sample frequency code other than 4 | 3.4.2 |
 
 The track reported with a warning is the track **number** (1 to the track count, specification
@@ -189,8 +189,7 @@ The track reported with a warning is the track **number** (1 to the track count,
 MAY report repeated occurrences separately.
 
 A reader MUST NOT report a code of 7.7.1 to 7.7.3 when its condition does not hold. Warnings
-outside these tables (for example about an unusual sample frequency code) MUST use other
-codes. The corpus therefore compares, for each image that is **not** rejected, the set of
+for conditions these tables do not list MUST use other codes. The corpus therefore compares, for each image that is **not** rejected, the set of
 (code, slot, track) triples a reader reports from 7.7.2 and 7.7.3, other than the optional
 `audio-sector-malformed`, `master-toc-copies-differ` and `sample-frequency-unknown`, for
 equality with the expected set. For a rejected image only the

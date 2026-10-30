@@ -20,8 +20,9 @@ any SACD code can write a correct reader from this repository alone.
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
 
-Start with specification 0, then 1 to 4 in order. Specification 5 is needed only for
-DST-coded areas, and 6 only for reading from a PS3. Specification 7 collects every check in
+Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
+frames, which any area can contain (the audio sectors, not the area TOC, say whether a frame is
+DST-coded), and 6 only for reading from a PS3. Specification 7 collects every check in
 one place.
 
 ## The clean-room process
