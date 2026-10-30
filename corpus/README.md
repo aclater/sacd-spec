@@ -81,8 +81,8 @@ Disc level (specification 2):
 
 | Key | Spec | Meaning |
 |---|---|---|
-| `sector_size` | 1.2 | stored sector size `P`: 2048, 2054 or 2064 |
-| `sectors` | 1.3 | `N`, the number of sectors in the image |
+| `sector_size` | 1.2 | stored sector size `P`: 2048, 2054 or 2064 (2048 for a disc read over the network) |
+| `sectors` | 1.3 | `N`, the number of sectors in the image (the reported disc size over the network) |
 | `version` | 2.3 | [major, minor] |
 | `album_set_size`, `album_sequence_number` | 2.3.1 | as stored |
 | `album_catalog_number`, `disc_catalog_number` | 2.6.5 | fixed text fields (may be empty) |
@@ -210,6 +210,12 @@ authority for them:
   packet, and discarding a frame that starts without a frame record;
 - the warnings `manufacturer-missing` (never expected) and `area-toc-too-large` (only in
   rejected images, where warnings are not compared);
+- the exact acceptance rule of the timeline (a repeated timecode is discarded), zero-length
+  audio packets counting towards a DST frame's sector count, the "at least 1 byte" condition
+  of frame completeness, and the exact threshold of 7 unread DST code bits;
+- the cap of 10 area locales, and that an unknown track text type with an empty string is not
+  reported;
+- a 1-byte plain DST frame (all 1-byte frames in the corpus are coded);
 - a raw 2054-byte image whose sectors are misaligned (`layout-2054-shifted` is, despite its
   name, aligned); a ninth ptable segment; EUC-KR composition sequences.
 
