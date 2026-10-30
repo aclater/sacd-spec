@@ -280,6 +280,12 @@ readers agree on hostile input.
 - The PS3 server behaviour of specification 6, 6.5 (the block-size table and the need for a
   priming read) describes observable protocol behaviour that clients must handle.
 
+### SECURITY.md and .github/
+
+Repository infrastructure, written new: a reporting policy, an OpenSSF Scorecard workflow, a
+link check of the Markdown files and Dependabot updates of the workflows' action pins. They
+contain nothing about the format and consulted no SACD source.
+
 ## Licensing note
 
 Specifications 5 and 6 are rewrites of documentation in pysacd, whose repository is licensed

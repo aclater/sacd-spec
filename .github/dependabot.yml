@@ -1,0 +1,15 @@
+# Keeps the commit-SHA pins in .github/workflows current. New releases wait two
+# weeks before a pull request is opened.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
