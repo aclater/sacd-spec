@@ -195,7 +195,8 @@ updated with the figures pysacd `docs/performance.md` publishes at commit 8a179b
 again numbers only. Round 1 of the results was measured by the specification side against
 compiled binaries only: `bench` from scarletbook-rs v0.1.0's release assets (its source was not
 read), `sacd_extract`, pysacd 0.2.1 and 0.2.2 (commit 8a179b5 and later, release v0.2.2), and FFmpeg
-8.1.3; numbers, conditions and the comparison with the targets only. The `bench` output for tracks without audio, area selection by slot,
+8.1.3; numbers, conditions and the comparison with the targets only. Round 2 measured only `bench` from scarletbook-rs v0.2.0's release assets (source not read)
+and reuses round 1's reference figures. The `bench` output for tracks without audio, area selection by slot,
 `no-such-area` and track-number padding were decided for this document in answer to issue #9;
 no source was consulted.
 
