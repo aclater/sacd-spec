@@ -35,6 +35,8 @@ here are in [03-area-toc.md](03-area-toc.md).
    (4.5 item 4 gives one such case). The track start LSNs of specification 3 MUST NOT change
    the result: a reader that uses them to seek MUST still produce exactly the frames this
    specification defines.
+6. A reader MAY process the sectors of an area more than once, for example once per track;
+   every pass gives the same frames (4.4.5 item 2, specification 7, 7.1 item 3).
 
 ## 4.3 Audio sector syntax
 

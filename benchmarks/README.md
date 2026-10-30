@@ -65,8 +65,19 @@ as a failure, not as a time.
 **Release binaries.** For each release tag, the implementation's CI publishes `bench` for
 `x86_64-unknown-linux-gnu` as a release asset named
 `bench-<version>-x86_64-linux.tar.gz`, built in release mode for a generic x86-64 target
-(no `target-cpu=native`), with a SHA-256 checksum asset alongside it. A second asset built
-for the measuring machine's CPU MAY be added, labelled as such.
+(no `target-cpu=native`), with a SHA-256 checksum asset alongside it. The checksum asset is named `<asset>.sha256` and
+holds one line in the format of `sha256sum` (lower-case hex digest, two spaces, the asset's
+file name).
+
+An implementation MAY also publish, for each measuring machine named under Method, one asset
+built for that machine's CPU, named `bench-<version>-x86_64-linux-<cpu>.tar.gz`, where
+`<cpu>` is the compiler's name for that CPU (for example `znver5`), with its own checksum
+asset. The measuring side runs the generic asset and, on each machine, that machine's asset
+if there is one, and reports which asset each figure comes from.
+
+A release MAY carry other builds of `bench` (for example for a microarchitecture level such
+as `x86-64-v3`). They are not benchmark assets: their names MUST NOT match either pattern
+above, and the measuring side ignores them.
 
 ## Method
 
