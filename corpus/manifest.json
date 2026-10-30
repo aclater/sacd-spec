@@ -31130,7 +31130,7 @@
    "id": "audio-tc-max",
    "category": "malformed",
    "origin": "pysacd hostile-image corpus",
-   "purpose": "Every stereo frame claims timecode 255:255:255: all slots missing.",
+   "purpose": "Every stereo frame claims timecode 255:255:255: every timeline position of the stereo tracks is missing.",
    "input": "corpus/images/audio-tc-max.iso",
    "input_sha256": "4468704c7b4c5444b6746b386d045bf4d573e744eeb506e9e377828bcb49081f",
    "input_bytes": 1439744,
