@@ -190,10 +190,10 @@ the values marked RECOMMENDED:
 | No. | Requirement | Value |
 |---|---|---|
 | 1 | Bound every length-delimited field before allocating for it: a field whose length prefix (the varint `n` of 6.3.2, not counting the key or the prefix itself) exceeds one full read plus a margin is a protocol error. | `n` at most 512 x 2048 + 1024 = 1 049 600 |
-| 2 | Bound the number of fields in one message, counting every field whose key has been read, skipped ones included. A 17th key is a protocol error. | 16 fields |
+| 2 | Bound the number of fields in one message, counting every field whose key has been read, skipped ones included. A 17th key is a protocol error; the end-of-message 0x00 is not counted. | 16 fields |
 | 3 | Reject a varint longer than 10 bytes, or a 10-byte varint whose value exceeds 64 bits. | |
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
-| 5 | A client MUST NOT send a read with `n = 0`. For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
+| 5 | A client MUST NOT send a read with `n = 0` or `n > 512`. For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
 | 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. On a missed deadline the client MUST close the connection; late bytes are never read. Connecting and sending a request MUST also be bounded in time; failing either is `network-connection-lost`. | 60 s RECOMMENDED for each |
 | 8 | Bound reconnection attempts. A reconnection attempt is every attempt to connect after the first connection of a transfer, whether or not the connection is established. The count restarts at 0 only when a read returns at least one sector the transfer needed and had not yet received (responses to the open, size and priming requests of item 9 do not restart it), so the total number of connections of a transfer is bounded. | at most 3 attempts without progress RECOMMENDED, with back-off |
