@@ -159,6 +159,62 @@ that workload when the measurement is made.
 Each round of measurements is appended here, newest first, with the implementation version,
 the machines, the conditions and every figure, and the distance to each target.
 
+### Round 2: scarletbook 0.2.0 (2026-10-30)
+
+**Program:** `bench` from the scarletbook-rs v0.2.0 release assets, generic and `znver5`
+builds; checksums verified, build provenance attestation verified.
+
+**Machine and conditions:** as round 1 (16-core machine, the same five discs, local copies,
+output in a RAM file system, mean of 3 runs, thread scaling at 1 thread: 1 run). One virtual
+machine was running but idle: it used 99 CPU seconds over the 925-second round (about 0.1 of
+a core). Only `bench` was measured; the figures of `sacd_extract` and reader P 0.2.2 are
+round 1's, on the same machine and discs.
+
+**Correctness gate:** passed. Both builds produced the reference hashes for every track and
+channel of all 7 areas.
+
+**Extraction, all threads** (wall seconds, CPU seconds in brackets; round 1 figure in
+italics):
+
+| | `sacd_extract` | reader P 0.2.2 | `bench` generic | `bench` znver5 |
+|---|---|---|---|---|
+| A | 3.67 | 1.00 | 1.19 (1.2) *1.31* | 1.03 (1.0) *1.19* |
+| B, 2-channel | 7.83 | 2.87 | 3.11 (97) *5.76* | **2.58** (80) *5.10* |
+| B, both areas | 35.02 | 11.75 | 14.27 (445) *26.08* | **11.30** (352) *23.03* |
+| C, both areas | 18.43 | 6.96 | 8.63 (250) *14.60* | **6.60** (188) *12.98* |
+| D | n/a | 2.35 | 2.60 (81) *4.66* | **2.22** (68) *4.26* |
+| E | n/a | 4.23 | 4.83 (150) *8.43* | **4.02** (124) *7.69* |
+
+**Decoding only** (`--sink null`, znver5): A 0.48 s, B 2-channel 2.59 s, B both areas 11.23 s,
+C both areas 6.25 s, D 2.20 s, E 4.00 s.
+
+**One core** (DST 2-channel, 50 min, 226 497 frames): `bench` 0.215 ms per frame (znver5) and
+0.239 (generic), against 0.278 for `bench` 0.1.0, 0.227 for reader P 0.2.2 and 0.680 for
+`sacd_extract`.
+
+**Thread scaling** (disc B, both areas, znver5, extraction):
+
+| Threads | 1 | 8 | 16 | 32 |
+|---|---|---|---|---|
+| `bench` wall | 183.2 s | 24.3 s (7.5×) | 13.4 s (13.7×) | 11.6 s (15.8×) |
+| `bench` CPU | 183 s | 194 s | 213 s | 353 s |
+
+**Peak memory:** `bench` 6 to 33 MB, flat with disc length.
+
+**Against the targets** (znver5 build; generic in brackets):
+
+| Target | Result |
+|---|---|
+| DST at least 1.5× `sacd_extract`, all threads | met: 2.8× to 3.1× (generic 2.1× to 2.5×) |
+| DST aim: as fast as the fastest baseline reader | met: 1.04× to 1.11× reader P 0.2.2 (generic 0.81× to 0.92×) |
+| DST single thread: frames per second of the fastest baseline reader | met: 0.215 against 0.227 ms per frame (generic 0.239: not met) |
+| Plain DSD at least 2.5× `sacd_extract` | met: 3.6× (generic 3.1×) |
+| Thread scaling at least 12× at 16 threads | met: 13.7× |
+| Memory bounded independently of duration | met |
+
+Reader P 0.2.2 was measured as a build for the measuring machine's CPU, so it compares with
+the znver5 build; the generic build compares with portable builds of other readers.
+
 ### Round 1: scarletbook 0.1.0 (2026-10-30)
 
 **Program:** `bench` from the scarletbook-rs v0.1.0 release assets, both the generic x86-64
