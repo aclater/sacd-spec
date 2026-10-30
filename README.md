@@ -18,6 +18,7 @@ any SACD code can write a correct reader from this repository alone.
 | [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
 | [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
+| [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
 
 Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
