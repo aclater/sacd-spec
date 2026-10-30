@@ -82,7 +82,7 @@ prevails over the summary tables here. The section references say where each rul
 | Sub-structure walk | ends at an unknown signature or the end of the TOC | | | 3.7.0 |
 | `SACDTRL1` and `SACDTRL2` | both found by the walk | either missing | `area-track-list-missing` (skip the area) | 3.7.0 |
 | `SACD_IGL` extent | within the TOC (when there is at least one track) | extends past the end | `area-toc-malformed` (skip the area) | 3.7.3 |
-| Track text offset | 0 (none), or `q + 4 <= E` | `q + 4 > E` | `track-text-offset-invalid` (warn; no text for the track) | 3.8.1 |
+| Track text offset | 0 (none), or `q + 4 <= E` with `q` the offset plus the position of the `SACDTTxt` structure | `q + 4 > E` | `track-text-offset-invalid` (warn; no text for the track) | 3.8.1 |
 | Track text item count | 0 to 255 | items starting past `E - 2` do not exist | | 3.8.1 |
 | Track text item type | 0x01 to 0x07, 0x81 to 0x87 | others (with a non-empty string) | `track-text-type-unknown` (warn; item ignored) | 3.8.1 |
 | Audio LSN range | first <= last | last < first | `area-audio-range-reversed` (skip the area) | 3.9.2 |
