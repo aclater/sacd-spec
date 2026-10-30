@@ -221,6 +221,22 @@ and 0.298 (generic), against 0.227 for reader P 0.2.2 and 0.680 for `sacd_extrac
 | Thread scaling at least 12× at 16 threads | not met: 11.3× |
 | Memory bounded independently of duration | met |
 
+**Real-world survey (same round, the 10-core machine).** Every SACD image of the measuring
+side's collection: 113 images, 128 areas, 100 hours of audio (100 2-channel plain DSD areas,
+13 2-channel DST, 15 multichannel DST; 14 of the areas on 2064-byte sector images). One run per
+program per area, order rotated per disc, all threads, each image read from the collection's
+disks once first (6.4 min for all of them) and then from the page cache. Reader P from its
+0.2.2 wheel, `bench` generic build. **Correctness gate: passed on all 128 areas.**
+
+| Areas | Count | Audio | reader P vs `sacd_extract`, median [range] | `bench` vs `sacd_extract`, median [range] | reader P vs `bench` |
+|---|---|---|---|---|---|
+| 2-channel, plain DSD | 100 | 74.6 h | 3.6× [2.9–4.0] | 2.5× [2.0–2.7] | 1.5× [1.2–1.8] |
+| 2-channel, DST | 13 | 13.1 h | 2.3× [2.3–2.3] | 1.4× [1.4–1.5] | 1.6× [1.5–1.7] |
+| multichannel, DST | 15 | 12.3 h | 2.4× [2.3–2.6] | 1.5× [1.3–1.6] | 1.7× [1.6–1.8] |
+
+Whole collection, the 114 areas `sacd_extract` reads: `sacd_extract` 41.3 min, reader P 16.2 min
+(2.5×), `bench` 26.5 min (1.6×). All 128 areas: reader P 19.0 min, `bench` 31.1 min.
+
 **Notes for the next round:**
 - From 16 to 32 threads, `bench`'s wall time is unchanged while its CPU time nearly
   doubles (331 s to 610 s); reader P gains 23% over the same step.
