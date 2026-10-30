@@ -20,8 +20,8 @@ The master TOC is 10 consecutive logical sectors starting at LSN 510:
 1. A reader MUST read all 10 sectors (LSN 510 to 519) as one read (specification 1, 1.3).
    If the read fails, **reject the image** with `master-toc-truncated`.
 2. The first 8 bytes of sector 0 MUST be `SACDMTOC`; otherwise **reject the image** with
-   `not-scarletbook`. (After detection this can only fail if a reader was told the format
-   instead of detecting it.)
+   `not-scarletbook`. (After detection this can only fail when no detection was run: a format
+   chosen by the caller, or a disc read over the network, specification 6.)
 3. If the version major number (2.3, offset 8) is greater than 1, **reject the image** with
    `master-toc-version-unsupported`. Every minor number is accepted, and major number 0 is
    accepted.

@@ -184,12 +184,13 @@ disc is the same, as 6.7 item 9 requires, before continuing.
 
 ## 6.7 Client requirements for hostile servers
 
-A client MUST treat the server as hostile. In particular:
+A client MUST treat the server as hostile. Each requirement in this table is a MUST, except
+the values marked RECOMMENDED:
 
 | No. | Requirement | Value |
 |---|---|---|
 | 1 | Bound every length-delimited field before allocating for it: a field whose length prefix (the varint `n` of 6.3.2, not counting the key or the prefix itself) exceeds one full read plus a margin is a protocol error. | `n` at most 512 x 2048 + 1024 = 1 049 600 |
-| 2 | Bound the number of fields in one message, counting every field read, skipped ones included. More is a protocol error. | 16 fields |
+| 2 | Bound the number of fields in one message, counting every field whose key has been read, skipped ones included. A 17th key is a protocol error. | 16 fields |
 | 3 | Reject a varint longer than 10 bytes, or a 10-byte varint whose value exceeds 64 bits. | |
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
 | 5 | A client MUST NOT send a read with `n = 0`. For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
@@ -200,6 +201,14 @@ A client MUST treat the server as hostile. In particular:
 | 10 | Apply specifications 1 to 5 and 7 to the sectors received as to a plain-format image file of `N` sectors, `N` being the reported disc size, with these differences: no format detection is run (the format is plain), and the client MUST NOT request any sector at or past `N`. So if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC (these outcomes can differ from those of a file of the same length, whose detection reads the bytes at LSN 510); every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
 
 ### 6.7.1 Error outcomes
+
+**Status of this section.** Conformance for a client rests on 6.2, 6.3, items 1 to 10 of 6.7
+and the transfer rules at the end of this section: it bounds every resource, never hangs, never
+requests a sector at or past the disc size, and never presents a failed transfer as complete.
+**Which code below a client reports, and whether it reconnects, are RECOMMENDED, not required:**
+when a failure meets more than one condition (for example a malformed response cut short by a
+dropped connection, or a changed disc size that is also below 520), two conforming clients may
+classify it differently. The order of checks below is the RECOMMENDED way to classify.
 
 Every failure of a client falls into one of these classes. When the connection is lost, or a
 deadline is missed, while a response is being received, the client first decodes the part
