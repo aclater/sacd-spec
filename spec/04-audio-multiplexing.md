@@ -157,7 +157,7 @@ number. The reader keeps a **next acceptable frame number** `a`, starting at 0 f
 2. Consequently each position holds at most one frame, the timeline is filled in increasing order,
    and a frame whose timecode goes backwards or repeats is discarded. After a frame with a very
    large timecode is accepted, every later frame with a smaller timecode is discarded.
-3. Slots that no accepted frame fills are **missing**.
+3. Timeline positions that no accepted frame fills are **missing**.
 4. Once a frame with number `t` has been accepted, no position below `t + 1` can change. A reader
    that needs only positions below some bound `u` MAY stop processing sectors as soon as it
    delivers a frame with number `t >= u`: the result for positions below `u` is the same.

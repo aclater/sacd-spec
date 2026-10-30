@@ -15,7 +15,7 @@ specifications; report it. The section references say where each rule is defined
    sector, whatever any value in the image says.
 2. A reader MUST bound every allocation by a constant of these specifications or by the size
    of the image before making it. No value read from an image may, by itself, make a reader
-   allocate more than: 128 sectors for an area TOC, 65 536 bytes for a frame under assembly,
+   allocate more than: 128 sectors for each of the two copies of an area TOC, 65 536 bytes for a frame under assembly,
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
    length, which 7.5 bounds by the image size.
 3. A reader MUST terminate on every input, and the work per structure is bounded by
@@ -59,7 +59,7 @@ specifications; report it. The section references say where each rule is defined
 |---|---|---|---|---|
 | Slot TOC-1 LSN, TOC size | both non-zero | either 0: slot unused (silent) | | 3.1 |
 | Area TOC size | 1 to 128 sectors | above 128 | `area-toc-too-large` (skip the area) | 3.2 |
-| TOC-1 sectors | all exist | any missing | `area-toc1-unreadable` (warn; use TOC-2) | 3.2 |
+| TOC-1 sectors | all exist | any missing | `area-toc1-unreadable` (warn; use TOC-2 if it is set and readable, else skip the area with `area-toc-unreadable`) | 3.2 |
 | TOC-2 LSN | 0 (no backup) or any | | | 3.2 |
 | TOC-2 sectors (if LSN non-zero) | all exist | any missing | `area-toc2-unreadable` (warn) | 3.2 |
 | TOC-1 and TOC-2 content | identical | different | `area-toc-copies-differ` (warn; use TOC-1) | 3.2 |
@@ -99,7 +99,7 @@ specifications; report it. The section references say where each rule is defined
 | Frame start with no frame record left | does not occur | no frame starts | `audio-sector-malformed` (SHOULD warn) | 4.4.3 |
 | Frame size during assembly | up to 65 536 bytes | larger: frame discarded | `audio-sector-malformed` (SHOULD warn) | 4.4.3 |
 | Packet types | 2, 3, 7 | others ignored like 3 and 7 | | 4.3.2 |
-| DST sector count | equals the frame's audio packet count | otherwise the frame is never complete (missing) | | 4.4.2 |
+| DST sector count | equals the frame's audio packet count | a frame is complete only while its remaining count is exactly 0 when the next frame starts or the area ends (4.4.2); an incomplete frame is discarded, and its timeline position stays missing unless another accepted frame fills it | | 4.4.2 |
 | Plain frame size | exactly `C x 4704` | otherwise never complete (missing) | | 4.4.2 |
 | Frame timecode | strictly increasing | a frame not above the previous accepted one is discarded | | 4.5 |
 | Timeline position never filled | | filled with 0x69 | (counted as missing) | 4.6 |
@@ -178,7 +178,8 @@ reported, because processing of the area stops there.
 | `track-lsn-outside-area` | slot, track | a track start LSN lies outside the audio range | 3.9.2 |
 | `audio-sector-malformed` | slot, LSN | (SHOULD) a malformed audio sector | 4.4.5 |
 
-A warning of a given code is reported at least once per (slot, track) it applies to. A reader
+The track reported with a warning is the track **number** (1 to the track count, specification
+3, 3.9.1). A warning of a given code is reported at least once per (slot, track) it applies to. A reader
 MAY report repeated occurrences separately.
 
 A reader MUST NOT report a code of 7.7.1 to 7.7.3 when its condition does not hold. Warnings
