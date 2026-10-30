@@ -21,8 +21,8 @@ There are two categories:
   channels, every character set code (0 to 7), the positions where published CJK mappings
   disagree, multi-disc set fields, a disc with no text, a disc with every text field, an area
   without ISRCs and genres, frame format 3, and a TOC-2 fallback.
-- **malformed** (102 cases): one broken thing each, mostly starting from the same small
-  base disc (case `hostile-base`): overlapping, inverted and out-of-image ranges, absurd counts
+- **malformed** (102 cases): mostly one broken thing each (a few cases combine several, as their
+  purpose says), mostly starting from the same small base disc (case `hostile-base`): overlapping, inverted and out-of-image ranges, absurd counts
   and durations, truncated areas and images, garbage, truncated, oversized and invalid DST
   frames, sector-layout confusion, and invalid text encodings.
 
@@ -170,7 +170,9 @@ For each case:
 4. Compare warnings: the set of (`code`, `area`, `track`) triples the reader reports from
    specification 7, 7.7.2 and 7.7.3, excluding `audio-sector-malformed`, must equal the set in
    `expected.warnings`. Repeated warnings count once.
-5. For each track in `expected.audio` (matched by `number`, with `first_frame` and `end_frame`
+5. The reader's areas must be those of `expected.audio` (by slot) and each area's tracks those
+   listed (by number); an extra or missing area or track is a failure. For each track in
+   `expected.audio` (matched by `number`, with `first_frame` and `end_frame`
    compared too): if the outcome is `skip` (track skipped) or `error` (track refused), the reader
    must produce no audio and report that code; if `ok`, the reader's audio for each channel must
    hash to the given value. The frame counts are a diagnostic aid: a reader that reports them
@@ -182,12 +184,33 @@ The images were built with the synthetic-image generator and the test DST encode
 (a GPL-licensed SACD toolkit), which are not part of this repository. The expected values were
 computed with pysacd's TOC reader and decoding engine, configured to follow these
 specifications where its command-line tools differ (whole-area scan clipped to the image,
-per-track capacity check, zero-length tracks skipped). The DST feature cases were also checked
+per-track capacity check, zero-length tracks skipped). One expected value was set by hand from
+the specification because pysacd does not apply the rule: track 2 of `dst-code-all-ones` (DST
+rule 17). The DST feature cases were also checked
 against the encoder's input signal: their decoded DSD equals the signal that was encoded.
 [PROVENANCE.md](../PROVENANCE.md) records the details.
 
 Implementations must not depend on how the corpus was made: the specifications define every
 expected value.
+
+## Known coverage limits
+
+A reader that gets these rules wrong still passes every case; the specifications are the
+authority for them:
+
+- the 4096-byte cut of text strings, the whitespace set of fixed text fields, and trailing-space
+  removal in language codes;
+- the `SACD_IGL` extent check (`area-toc-malformed` is never expected), "last `SACD_IGL`
+  wins" and "first `SACDTTxt` wins", and stopping the sub-structure walk at an unknown
+  signature;
+- area text offsets between 2048 and the end of the area TOC; disc text decoded with locale 0's
+  character set when the text channel count is 0;
+- the exact 65 536-byte boundary of a frame under assembly, stopping a sector at an overrunning
+  packet, and discarding a frame that starts without a frame record;
+- the warnings `manufacturer-missing` (never expected) and `area-toc-too-large` (only in
+  rejected images, where warnings are not compared);
+- a raw 2054-byte image whose sectors are misaligned (`layout-2054-shifted` is, despite its
+  name, aligned); a ninth ptable segment; EUC-KR composition sequences.
 
 ## Size
 
