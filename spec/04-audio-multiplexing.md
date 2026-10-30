@@ -146,6 +146,16 @@ After the last sector (4.2), if a frame is under assembly and it is complete, de
 A reader SHOULD warn `audio-sector-malformed` for a malformed sector, with its LSN. The
 corpus does not require this warning.
 
+1. The warning covers the sectors the reader actually processes. A reader that stops early
+   (4.2 item 5, 4.5 item 4) does not warn for sectors it did not process.
+2. A sector SHOULD be reported once for its area, keyed by (slot, LSN). A reader that processes
+   a sector more than once (for example one pass per track) MAY report it again.
+3. Keeping one warning per malformed sector is an allocation proportional to the number of
+   sectors processed, which specification 7, 7.1 item 2 allows. A reader MAY instead keep only
+   the first `K` such warnings of an area in the order it processes sectors, for a constant
+   `K` of its own (at least 1); it then SHOULD also report the number of malformed sectors it
+   processed in that area, so that the omission is visible.
+
 ## 4.5 Delivery and the timeline
 
 Delivered frames are placed on the area's **timeline**, which has one **position** for each frame

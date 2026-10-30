@@ -81,6 +81,15 @@ these specifications.
 2. A reader MUST read the master TOC from LSN 510. Its outcome (accepted, rejected, and every
    value) MUST be exactly what LSN 510 to 519 yield. A reader MAY compare the copies and warn
    `master-toc-copies-differ` when they differ, but MUST NOT substitute a copy for LSN 510.
+3. A reader that compares the copies does so as follows. Each copy at LSN 520 and 530 is read
+   as one read of 10 sectors (1.3), like LSN 510 (specification 2, 2.2 item 1); a copy whose
+   read fails is not compared and causes no warning. A copy that is read **differs** when any
+   of its 20 480 bytes differs from the byte in the same position of LSN 510 to 519. All bytes
+   take part, including reserved bytes, bytes no syntax table lists, text channels a reader
+   does not decode, and the manufacturer data of sector 9 (0.2 item 6). The comparison is
+   made only if the master TOC at LSN 510 was accepted (specification 2, 2.2).
+   `master-toc-copies-differ` is reported at most once per image, with no context, whether one
+   or both copies differ.
 
 ### 1.5.2 Areas
 

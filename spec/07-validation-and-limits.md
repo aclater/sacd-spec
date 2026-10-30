@@ -19,8 +19,11 @@ prevails over the summary tables here. The section references say where each rul
    allocate more than: 128 sectors for each of the two copies of an area TOC, 65 536 bytes for a frame under assembly,
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
    length, which 7.5 bounds by 7 frames of at most `6 x 4704` bytes per existing audio sector
-   (about 100 times the size of the area's audio sectors), and the frames held between delivery
-   and output (specification 4, 4.5 item 5).
+   (about 100 times the size of the area's audio sectors), the frames held between delivery
+   and output (specification 4, 4.5 item 5), and diagnostics: each warning is of bounded size,
+   and their number is bounded by a constant per structure of these specifications plus at most
+   one `audio-sector-malformed` per audio sector processed (specification 4, 4.4.5), which a
+   reader MAY cap further.
 3. A reader MUST terminate on every input, and the work per structure is bounded by
    constants of these specifications: the sub-structure walk takes at most 128 steps per area;
    disc text takes at most 16 strings of at most 4096 bytes; area text at most 4 strings; track
@@ -181,12 +184,14 @@ reported, because processing of the area stops there.
 | `track-past-playtime` | slot, track | a track ends after the area play time; clamped | 3.9.2 |
 | `track-lsn-outside-area` | slot, track | a track start LSN lies outside the audio range | 3.9.2 |
 | `audio-sector-malformed` | slot, LSN | (SHOULD) a malformed audio sector | 4.4.5 |
-| `master-toc-copies-differ` | | (MAY) a master TOC copy at LSN 520 or 530 that can be read in full differs from LSN 510 (a copy that cannot be read is not compared) | 1.5.1 |
+| `master-toc-copies-differ` | | (MAY) a master TOC copy at LSN 520 or 530 that can be read in full (one read of 10 sectors) differs from LSN 510 to 519 in any of its 20 480 bytes; reported at most once (a copy that cannot be read is not compared) | 1.5.1 |
 | `sample-frequency-unknown` | slot | (SHOULD) sample frequency code other than 4 | 3.4.2 |
 
 The track reported with a warning is the track **number** (1 to the track count, specification
 3, 3.9.1). A warning of a given code is reported at least once per (slot, track) it applies to. A reader
-MAY report repeated occurrences separately.
+MAY report repeated occurrences separately. `audio-sector-malformed` and
+`master-toc-copies-differ` follow their own rules instead (specification 4, 4.4.5;
+specification 1, 1.5.1 item 3).
 
 A reader MUST NOT report a code of 7.7.1 to 7.7.3 when its condition does not hold. Warnings
 for conditions these tables do not list MUST use other codes. The corpus therefore compares, for each image that is **not** rejected, the set of

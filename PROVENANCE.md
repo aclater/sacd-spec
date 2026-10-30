@@ -56,7 +56,8 @@ formula from P-TOC.
 - 1.3 item 1 (a trailing partial stored sector does not exist) and item 3 (all-or-nothing
   reads): P-TOC (sector count and short-read behaviour).
 - 1.5 (disc layout, master TOC copies at 520 and 530): P-GEN (writes three copies), P-TOC
-  (reads LSN 510 only).
+  (reads LSN 510 only). 1.5.1 item 3 (what a master TOC copy comparison compares, reported once)
+  was decided for this specification in answer to issue #4; pysacd does not compare the copies.
 - 1.6 (largest disc): P-REMOTE comment on dual-layer sizes.
 
 ### spec/02-master-toc-and-text.md
@@ -102,7 +103,9 @@ formula from P-TOC.
   defines the result as a whole-area scan clipped to the image (frames past the end are
   missing), so that results do not depend on which tracks are requested.
 - 4.3 to 4.4 (sector header, packet and frame records, reassembly, completeness, malformed
-  sectors): P-DEMUX.
+  sectors): P-DEMUX. The rules for reporting `audio-sector-malformed` (4.4.5 items 1 to 3:
+  processed sectors only, keyed by slot and LSN, optional cap with a count) were decided for
+  this specification in answer to issue #5.
 - 4.5 (timeline, next acceptable frame number): P-ENGINE (frame staging). The equivalence of
   early stopping (4.5 item 4) was derived for this specification.
 - 4.6 (frame contents and fills): P-ENGINE, P-DST.
@@ -149,7 +152,8 @@ pysacd).
 
 Consolidated from specifications 1 to 6. Starting points: P-SEC ("Hostile images" table,
 "PS3 network protocol"), P-HOSTILE. Diagnostic codes are new names for conditions that P-TOC
-reports as free-text warnings. 7.9 (real-disc survey) from P-SEC.
+reports as free-text warnings. 7.9 (real-disc survey) from P-SEC. Diagnostics in the
+allocation bound of 7.1 item 2 were added in answer to issue #5.
 
 ### corpus/
 
