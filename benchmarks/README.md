@@ -87,28 +87,50 @@ for the measuring machine's CPU MAY be added, labelled as such.
 
 ## Baseline
 
-Measured before any implementation from these specifications existed, on the machines above.
-Wall-clock seconds, CPU seconds in brackets, all threads, writing DSF:
+Measured before any implementation from these specifications existed. Wall-clock seconds,
+CPU seconds in brackets, all threads, writing DSF.
 
-| | 16-core: `sacd_extract` | 16-core: reader P | 10-core: `sacd_extract` | 10-core: reader P |
-|---|---|---|---|---|
-| Plain DSD, 2-channel (78 min) | 3.2 (2.9) | 1.3 (2.0) | 7.9 (6.0) | 2.2 (4.7) |
-| DST, 2-channel (50 min) | 7.9 (245) | 7.8 (243) | 42.0 (457) | 39.7 (451) |
-| DST, 2-channel + 5-channel | 35.6 (1094) | 33.4 (1020) | 175.2 (1958) | 159.3 (1817) |
+**10-core machine**, mean of 3 runs, programs alternated:
 
-`sacd_extract` is a generic x86-64 build of sacd-ripper's extractor, and reader P is pysacd 0.2 (GPL).
-Single-thread DST decoding cost on the 16-core machine: about 0.41 ms per 2-channel frame
-and 1.15 ms per 6-channel frame. On DST discs both readers keep every core busy, so the cost
-per frame decides the result. These figures are updated when the baseline readers change.
+| | `sacd_extract` | reader P 0.2.1 | reader P after its DST work |
+|---|---|---|---|
+| Plain DSD, 2-channel (78 min) | 7.9 (6.0) | 2.2 (4.7) | 2.2 (4.7) |
+| DST, 2-channel (50 min) | 43.4 (467) | 33.9 | **18.0** (193) |
+| DST, 2-channel + 5-channel | 181.8 (1989) | 137.2 | **69.5** (758) |
+
+**16-core machine** (measured with reader P 0.2.1; the DST rows predate its DST work):
+
+| | `sacd_extract` | reader P 0.2.1 |
+|---|---|---|
+| Plain DSD, 2-channel (78 min) | 3.2 (2.9) | 1.3 (2.0) |
+| DST, 2-channel (50 min) | 7.9 (245) | 7.8 (243) |
+| DST, 2-channel + 5-channel | 35.6 (1094) | 33.4 (1020) |
+
+**Single thread, decoding only** (ms per frame, mean of 3):
+
+| | reader P 0.2.1 | reader P after its DST work |
+|---|---|---|
+| 16-core machine, 2 channels | 0.410 | **0.225** |
+| 16-core machine, 6 channels | 1.152 | **0.670** |
+| 10-core machine (performance core), 2 channels | 1.19 | **0.74** |
+| 10-core machine (performance core), 6 channels | 3.02 | **2.09** |
+
+On one core of the 16-core machine, a DST 2-channel disc took 154.7 s with `sacd_extract` and
+51.6 s with reader P after its DST work.
+
+`sacd_extract` is a generic x86-64 build of sacd-ripper's extractor, and reader P is pysacd
+(GPL). On DST discs every reader keeps all cores busy, so the cost per frame decides the
+result. These figures are updated when the baseline readers change.
 
 ## Targets
 
 For a reader built from these specifications, measured as above, with every correctness
-gate passed:
+gate passed. "The fastest baseline reader" is whichever reader in the baseline is fastest on
+that workload when the measurement is made.
 
 | Workload | Target |
 |---|---|
-| DST, all threads, wall time | at least 1.5 times faster than `sacd_extract` |
+| DST, all threads, wall time | at least 1.5 times faster than `sacd_extract`; aim: at least as fast as the fastest baseline reader (today 2.4 to 2.6 times `sacd_extract`) |
 | DST, single thread | at least as many frames per second as the fastest baseline reader |
 | Plain DSD, wall time | at least 2.5 times faster than `sacd_extract` |
 | Thread scaling (DST) | at least 12 times faster at 16 threads than at 1 |
