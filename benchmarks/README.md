@@ -110,13 +110,22 @@ CPU seconds in brackets, all threads, writing DSF.
 | DST, 2-channel (50 min) | 43.4 (467) | 33.9 | **18.0** (193) |
 | DST, 2-channel + 5-channel | 181.8 (1989) | 137.2 | **69.5** (758) |
 
-**16-core machine** (measured with reader P 0.2.1; the DST rows predate its DST work):
+**16-core machine**, mean of 3 runs, programs alternated (reader P 0.2.2 is the version with
+its DST work):
 
-| | `sacd_extract` | reader P 0.2.1 |
-|---|---|---|
-| Plain DSD, 2-channel (78 min) | 3.2 (2.9) | 1.3 (2.0) |
-| DST, 2-channel (50 min) | 7.9 (245) | 7.8 (243) |
-| DST, 2-channel + 5-channel | 35.6 (1094) | 33.4 (1020) |
+| | `sacd_extract` | reader P 0.2.1 | reader P 0.2.2 |
+|---|---|---|---|
+| Plain DSD, 2-channel (78 min) | 3.67 (3.7) | 1.00 (2.9) | **1.00** (2.8) |
+| DST, 2-channel (50 min) | 7.83 (244) | 6.07 (189) | **2.87** (87) |
+| DST, 2-channel + 6-channel (50 min each) | 35.02 (1096) | 27.31 (854) | **11.75** (368) |
+
+**One core**, 16-core machine, DST 2-channel area of 50 min (226 497 frames), mean of 3:
+
+| | ms per frame |
+|---|---|
+| `sacd_extract` | 0.680 |
+| FFmpeg 8.1.3 DST decoder (estimate: its DST time minus its DSD-to-PCM time on the same area) | 0.669 |
+| reader P 0.2.2 | **0.227** |
 
 **Single thread, decoding only** (ms per frame, mean of 3):
 
@@ -126,9 +135,6 @@ CPU seconds in brackets, all threads, writing DSF.
 | 16-core machine, 6 channels | 1.152 | **0.670** |
 | 10-core machine (performance core), 2 channels | 1.19 | **0.74** |
 | 10-core machine (performance core), 6 channels | 3.02 | **2.09** |
-
-On one core of the 16-core machine, a DST 2-channel disc took 154.7 s with `sacd_extract` and
-51.6 s with reader P after its DST work.
 
 `sacd_extract` is a generic x86-64 build of sacd-ripper's extractor, and reader P is pysacd
 (GPL). On DST discs every reader keeps all cores busy, so the cost per frame decides the
@@ -153,4 +159,71 @@ that workload when the measurement is made.
 Each round of measurements is appended here, newest first, with the implementation version,
 the machines, the conditions and every figure, and the distance to each target.
 
-No rounds yet.
+### Round 1: scarletbook 0.1.0 (2026-10-30)
+
+**Program:** `bench` from the scarletbook-rs v0.1.0 release assets, both the generic x86-64
+build and the build for the measuring machine's CPU (`znver5`), checksums verified.
+
+**Machine and conditions:** the 16-core machine, otherwise idle (no virtual machines
+running), Linux; images on local storage, in the page cache; output in a RAM file system;
+programs alternated, mean of 3 runs (thread scaling at 1 thread: 1 run).
+
+**Discs** (real, not distributed):
+
+| | Areas | Frame format | Sector format | Duration |
+|---|---|---|---|---|
+| A | 2-channel | plain DSD | 2048 | 79 min |
+| B | 2-channel + 6-channel | DST | 2048 | 50 min each |
+| C | 2-channel + 5-channel | plain DSD + DST | 2048 | 46 min each |
+| D | 2-channel | DST | 2064 | 41 min |
+| E | 2-channel | DST | 2064 | 76 min |
+
+**Correctness gate:** passed. Both builds produced the reference hashes for every track
+and channel of all 7 areas.
+
+**Extraction, all threads** (wall seconds, CPU seconds in brackets; `bench` writes raw DSD,
+the others DSF; `sacd_extract` does not read 2064-byte sector images):
+
+| | `sacd_extract` | reader P 0.2.2 | `bench` generic | `bench` znver5 |
+|---|---|---|---|---|
+| A | 3.67 (3.7) | 1.00 (2.8) | 1.31 (1.3) | 1.19 (1.2) |
+| B, 2-channel | 7.83 (244) | 2.87 (87) | 5.76 (144) | 5.10 (130) |
+| B, both areas | 35.02 (1096) | 11.75 (368) | 26.08 (660) | 23.03 (607) |
+| C, both areas | 18.43 (515) | 6.96 (205) | 14.60 (344) | 12.98 (324) |
+| D | n/a | 2.35 (71) | 4.66 (118) | 4.26 (107) |
+| E | n/a | 4.23 (131) | 8.43 (215) | 7.69 (196) |
+
+**Decoding only** (`bench --sink null`, all threads, znver5 build): A 0.45 s, B 2-channel
+4.57 s, B both areas 20.94 s, C both areas 11.40 s, D 3.77 s, E 6.89 s.
+
+**One core** (DST 2-channel, 50 min, 226 497 frames): `bench` 0.278 ms per frame (znver5)
+and 0.298 (generic), against 0.227 for reader P 0.2.2 and 0.680 for `sacd_extract`.
+
+**Thread scaling** (disc B, both areas, znver5 build, extraction):
+
+| Threads | 1 | 8 | 16 | 32 |
+|---|---|---|---|---|
+| `bench` wall | 263.8 s | 38.0 s (6.9×) | 23.4 s (11.3×) | 23.2 s (11.4×) |
+| `bench` CPU | 263 s | 284 s | 331 s | 610 s |
+| reader P 0.2.2 wall | 203.4 s | 26.6 s (7.7×) | 14.5 s (14.0×) | 11.8 s (17.2×) |
+
+**Peak memory:** `bench` 6 to 32 MB, flat with disc length; reader P 86 to 181 MB;
+`sacd_extract` 6 to 50 MB.
+
+**Against the targets:**
+
+| Target | Result |
+|---|---|
+| DST at least 1.5× `sacd_extract`, all threads | met narrowly: 1.52× (B both areas), 1.54× (B 2-channel), 1.42× (C both areas, not met) |
+| DST aim: as fast as the fastest baseline reader | not met: reader P 0.2.2 is 1.8 to 2.0× faster on every DST case |
+| DST single thread: frames per second of the fastest baseline reader | not met: 0.278 ms per frame against 0.227 (reader P is 1.22× faster) |
+| Plain DSD at least 2.5× `sacd_extract` | met: 3.1× (znver5), 2.8× (generic) |
+| Thread scaling at least 12× at 16 threads | not met: 11.3× |
+| Memory bounded independently of duration | met |
+
+**Notes for the next round:**
+- From 16 to 32 threads, `bench`'s wall time is unchanged while its CPU time nearly
+  doubles (331 s to 610 s); reader P gains 23% over the same step.
+- The single-thread figure on real disc frames (0.278 ms) differs from figures on corpus
+  frames; only real-disc figures are used for the targets.
+- The release assets carry checksums but no build provenance attestation.
