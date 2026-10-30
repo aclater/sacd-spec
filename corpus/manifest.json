@@ -35486,7 +35486,7 @@
    "id": "layout-2054-shifted",
    "category": "malformed",
    "origin": "pysacd hostile-image corpus",
-   "purpose": "Raw 2054-byte sectors with a requested shift that the format cannot apply (the data stays at offset 6): reads like layout-2054.",
+   "purpose": "Raw 2054-byte sectors built as a misalignment test, but every sector's data is in fact at offset 6, so the image reads exactly like layout-2054 (kept as a regression case).",
    "input": "corpus/images/layout-2054-shifted.iso",
    "input_sha256": "ca7ce8f3bc6aba8d7704bad1607be0d3a7f1bc5ae3015c63014d4065d53121d7",
    "input_bytes": 1443962,
@@ -38765,6 +38765,490 @@
         "sha256": [
          "85f4ac8fe26767d3aa6ba44f0f8fddc4212d0581b08b8885892221238ac0f1ae",
          "ffd8f66062c6298cbea629d249773eeddeb0fd7dffec87bc8949344942678520"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "charset-table-points-3-4",
+   "category": "valid",
+   "origin": "new",
+   "purpose": "Disc text in set 3 and track text in set 4 at the positions where published mappings disagree, the JIS X 0213:2004 reserved pairs, CP932 and Unified Hangul Code extension sequences (invalid), and a two-code-point character.",
+   "input": "corpus/images/charset-table-points-3-4.iso",
+   "input_sha256": "d6ac7d522e1825186047153f10ab5a57612652ae0a288e30c0011bb50951d4af",
+   "input_bytes": 1150976,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 562,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "xx",
+       "charset": 3
+      }
+     ],
+     "text": {
+      "album_artist": "Plain ASCII",
+      "album_title": "¥‾\\〜‖−¢£¬鬝 ��� �� か゚A"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 2,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 2,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 555,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 4
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 10,
+         "start_frame": 0,
+         "duration_frames": 2,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "€® �AA 가"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 2,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "7a1553e7dad3a0154b5ecdfd5936f4e64c4079b928018d303c24264b320a4968",
+         "4b155047ebbdd5f6798ad7303cdbe71624ae7ea8641ad93ff00296044639ab2e"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "charset-table-points-5-6",
+   "category": "valid",
+   "origin": "new",
+   "purpose": "Disc text in set 5 and track text in set 6 at the positions where published mappings disagree, and GBK, CP950 and HKSCS extension sequences (invalid).",
+   "input": "corpus/images/charset-table-points-5-6.iso",
+   "input_sha256": "16e3bb843b0923f9cb30509e824d9b3f837cc4debeb760f243e977b7b09600a9",
+   "input_bytes": 1150976,
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 562,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "xx",
+       "charset": 5
+      }
+     ],
+     "text": {
+      "album_artist": "Plain ASCII",
+      "album_title": "・― �@A 啊"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 2,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 2,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 555,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 6
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 10,
+         "start_frame": 0,
+         "duration_frames": 2,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "•､‾∼♁☉／＼¥¢£ �痑��@A 一"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 2,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 0,
+        "sha256": [
+         "3f559bc41900a37efb9282f522ae64684fd2ac4f3ca438949f2e18560a0a7d4d",
+         "1a11ba5b0374ea099b8d144565db43edf0b3e5473766f497caffcf2d0d904b3b"
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "dst-invalid-code-2ch",
+   "category": "malformed",
+   "origin": "new",
+   "purpose": "DST frames that break only the arithmetic-code rules: frame 1 has cb[0] = 1 (rule arithmetic-code) and frame 3 has three zero bytes appended (rule unread-code-bits); frame 5 has one zero byte appended, which is still valid. Frames 0, 2 and 4 are valid.",
+   "input": "corpus/images/dst-invalid-code-2ch.iso",
+   "input_sha256": "fa2cb5ee823858109c5c683df5a9bdfe1298bed5f1144af2e7fcb13f307a0a29",
+   "input_bytes": 1155072,
+   "frames": [
+    {
+     "area": "2ch",
+     "frame": 0,
+     "content": "valid coded frame",
+     "dst_valid": true
+    },
+    {
+     "area": "2ch",
+     "frame": 1,
+     "content": "violates DST rule arithmetic-code",
+     "dst_valid": false
+    },
+    {
+     "area": "2ch",
+     "frame": 2,
+     "content": "valid coded frame",
+     "dst_valid": true
+    },
+    {
+     "area": "2ch",
+     "frame": 3,
+     "content": "violates DST rule unread-code-bits",
+     "dst_valid": false
+    },
+    {
+     "area": "2ch",
+     "frame": 4,
+     "content": "valid coded frame",
+     "dst_valid": true
+    },
+    {
+     "area": "2ch",
+     "frame": 5,
+     "content": "valid coded frame with one zero byte appended",
+     "dst_valid": true
+    }
+   ],
+   "expected": {
+    "outcome": "ok",
+    "error": null,
+    "warnings": [],
+    "toc": {
+     "sector_size": 2048,
+     "sectors": 564,
+     "version": [
+      1,
+      20
+     ],
+     "album_set_size": 1,
+     "album_sequence_number": 1,
+     "album_catalog_number": "PYSACD-TEST",
+     "album_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "disc_catalog_number": "PYSACD-0001",
+     "disc_genres": [
+      {
+       "category": 1,
+       "genre": 25
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      },
+      {
+       "category": 0,
+       "genre": 0
+      }
+     ],
+     "hybrid": false,
+     "date": {
+      "year": 2026,
+      "month": 10,
+      "day": 28
+     },
+     "locales": [
+      {
+       "language": "en",
+       "charset": 2
+      }
+     ],
+     "text": {
+      "album_artist": "pysacd synthetic",
+      "album_title": "DST code rules",
+      "disc_artist": "pysacd synthetic",
+      "disc_title": "DST code rules"
+     },
+     "manufacturer_sector": true,
+     "areas": [
+      {
+       "slot": "2ch",
+       "signature": "TWOCHTOC",
+       "version": [
+        1,
+        20
+       ],
+       "toc_lsn": 540,
+       "toc_sectors": 6,
+       "max_byte_rate": 705600,
+       "sample_frequency_code": 4,
+       "frame_format": 0,
+       "channel_count": 2,
+       "area_config": 0,
+       "max_available_channels": 2,
+       "area_mute_flags": 0,
+       "track_attribute": 0,
+       "playtime_frames": 6,
+       "track_offset": 0,
+       "audio_start_lsn": 546,
+       "audio_end_lsn": 557,
+       "locales": [
+        {
+         "language": "en",
+         "charset": 2
+        }
+       ],
+       "text": {},
+       "tracks": [
+        {
+         "number": 1,
+         "start_lsn": 546,
+         "length_lsn": 12,
+         "start_frame": 0,
+         "duration_frames": 6,
+         "start_flags": 0,
+         "duration_flags": 0,
+         "isrc": "XXPYS2600001",
+         "genre": {
+          "category": 1,
+          "genre": 25
+         },
+         "text": {
+          "title": "Code bits"
+         }
+        }
+       ]
+      }
+     ]
+    },
+    "audio": [
+     {
+      "area": "2ch",
+      "tracks": [
+       {
+        "number": 1,
+        "first_frame": 0,
+        "end_frame": 6,
+        "outcome": "ok",
+        "missing_frames": 0,
+        "invalid_dst_frames": 2,
+        "sha256": [
+         "aa9ce7c207cf2728ce5a1ef39b7515000986a15963c721390e7edab70a88820e",
+         "86ef366fb6eacc2094b0b90c9763efa1acd20b752d02c329a196902c2c106181"
         ]
        }
       ]

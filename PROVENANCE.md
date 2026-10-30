@@ -145,7 +145,9 @@ reports as free-text warnings. 7.9 (real-disc survey) from P-SEC.
   channels, synthetic sigma-delta test signal). New cases (all with `origin: new`) were made by
   calling those builders with other parameters or by patching their output: character sets 0
   to 7, album set, no text, full text, TOC-2 fallback, coded DST in raw layouts, a 5-channel
-  plain disc, invalid DST frames inside discs, truncated DST frames, invalid CJK text.
+  plain disc, invalid DST frames inside discs, truncated DST frames, invalid CJK text, and
+  (after the first cold read) the CJK table positions where published mappings disagree and DST
+  frames breaking only the arithmetic-code rules.
 - Case names of the malformed cases taken from the hostile-image corpus are the names that
   corpus uses, for traceability.
 - Expected values: computed with P-TOC and the decoding engine (P-ENGINE, P-DEMUX, P-DSTC),

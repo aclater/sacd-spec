@@ -16,11 +16,12 @@ The corpus is dedicated to the public domain under CC0 1.0 (see [LICENSE](LICENS
 
 There are two categories:
 
-- **valid** (23 cases): well-formed discs covering the three sector formats, stereo and
+- **valid** (25 cases): well-formed discs covering the three sector formats, stereo and
   multichannel areas, DST and plain DSD, every optional DST syntax feature at 2, 5 and 6
-  channels, every character set code (0 to 7), multi-disc set fields, a disc with no text, a
-  disc with every text field, and a TOC-2 fallback.
-- **malformed** (99 cases): one broken thing each, mostly starting from the same small
+  channels, every character set code (0 to 7), the positions where published CJK mappings
+  disagree, multi-disc set fields, a disc with no text, a disc with every text field, and a
+  TOC-2 fallback.
+- **malformed** (100 cases): one broken thing each, mostly starting from the same small
   base disc (case `hostile-base`): overlapping, inverted and out-of-image ranges, absurd counts
   and durations, truncated areas and images, garbage, truncated, oversized and invalid DST
   frames, sector-layout confusion, and invalid text encodings.
@@ -35,6 +36,7 @@ The top level is an object:
 |---|---|---|
 | `format` | string | `sacd-spec conformance manifest` |
 | `format_version` | integer | 1 |
+| `description` | string | one-line description of the file |
 | `spec_version` | string | version of the specifications the expectations follow |
 | `license` | string | `CC0-1.0` |
 | `cases` | array | one object per case |
@@ -45,7 +47,7 @@ The top level is an object:
 |---|---|---|
 | `id` | string | unique name; the image is `images/<id>.iso` |
 | `category` | string | `valid` or `malformed` |
-| `origin` | string | `pysacd hostile-image corpus` for cases taken from that corpus, `new` for cases added for this repository |
+| `origin` | string | `pysacd hostile-image corpus` for cases taken from that corpus (their ids are the names that corpus uses, kept for traceability), `new` for cases added for this repository |
 | `purpose` | string | what the case exercises |
 | `input` | string | path of the image, relative to the repository root |
 | `input_sha256` | string | SHA-256 of the image file, lower-case hex |
@@ -70,7 +72,8 @@ specification 5, section 5.6.
 
 A warning is an object with `code` (specification 7, 7.7.2 or 7.7.3), `area` (the slot, `2ch`
 or `multichannel`, when the code concerns an area) and `track` (the track number, when it
-concerns a track).
+concerns a track). A key that does not apply is left out; for comparison, a left-out `area` or
+`track` means "none" and equals a reader's null or absent value.
 
 ### TOC object
 
@@ -146,7 +149,7 @@ Track audio object ([specification 4](../spec/04-audio-multiplexing.md)):
 | `number` | track number |
 | `first_frame`, `end_frame` | the frame range `[first_frame, end_frame)` of 4.7 |
 | `outcome` | `ok`, `skip` (track skipped) or `error` (track refused) |
-| `error` | for `skip` and `error`, the code of 4.8 / 7.7.4 |
+| `error` | for `skip` and `error`, the code of 4.8 / 7.7.4; left out for `ok` |
 | `missing_frames` | for `ok`, how many frames of the range were missing (filled with 0x69) |
 | `invalid_dst_frames` | for `ok`, how many frames of the range were invalid DST frames (filled with 0x55) |
 | `sha256` | for `ok`, one SHA-256 (lower-case hex) per channel, in channel order, of that channel's track audio (4.7 item 2): `(end_frame - first_frame) x 4704` bytes, DSD bytes with the earliest sample in the MSB |
@@ -157,26 +160,20 @@ For each case:
 
 1. Verify the image's SHA-256 against `input_sha256`.
 2. Read the image. If `expected.outcome` is `reject`, the reader must reject it with
-   `expected.error`, and must not produce a TOC.
-3. Otherwise compare the reader's TOC with `expected.toc`:
-   - every key listed above must be present with an equal value;
-   - for text objects, the set of present items must be equal, and each string must be equal,
-     except for strings containing U+FFFD (below).
+   `expected.error` and must not produce a TOC or audio. Nothing else is compared for a rejected
+   image: `warnings` is empty in the manifest, and warnings a reader emits before rejecting are
+   not checked (specification 0, 0.8).
+3. Otherwise the reader must not reject the image. Compare the reader's TOC with
+   `expected.toc`: every key listed above must have an equal value; text objects must have the
+   same set of items with equal strings (code point for code point). A reader's own TOC
+   representation may hold more information; only the keys listed above are compared.
 4. Compare warnings: the set of (`code`, `area`, `track`) triples the reader reports from
-   specification 7, 7.7.1 to 7.7.3, excluding `audio-sector-malformed`, must equal the set in
-   `expected.warnings`. (Repeated warnings count once.)
+   specification 7, 7.7.2 and 7.7.3, excluding `audio-sector-malformed`, must equal the set in
+   `expected.warnings`. Repeated warnings count once.
 5. For each track in `expected.audio`: if the outcome is `skip` or `error`, the reader must
    produce no audio and report that code; if `ok`, the reader's audio for each channel must
    hash to the given value. The frame counts are a diagnostic aid: a reader that reports them
    must report these values.
-
-**Strings containing U+FFFD.** How many replacement characters an invalid byte sequence
-produces is implementation-defined (specification 2, 2.6.3). For an expected string that
-contains U+FFFD, the reader's string must contain U+FFFD, and its part before its first U+FFFD
-must equal the expected string's part before its first U+FFFD. Nothing after it is compared.
-Only the cases with deliberately invalid text (`master-charset-sjis-garbage`,
-`text-sjis-garbage`, `text-invalid-euckr`, `text-invalid-gb2312`, `text-invalid-big5`) contain
-such strings.
 
 ## How the corpus was made
 
@@ -193,5 +190,5 @@ expected value.
 
 ## Size
 
-About 165 MB uncompressed, 122 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
+About 168 MB uncompressed, 125 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
 sectors before the master TOC, which compress well, so the repository stays far smaller.
