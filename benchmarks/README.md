@@ -96,7 +96,7 @@ Wall-clock seconds, CPU seconds in brackets, all threads, writing DSF:
 | DST, 2-channel (50 min) | 7.9 (245) | 7.8 (243) | 42.0 (457) | 39.7 (451) |
 | DST, 2-channel + 5-channel | 35.6 (1094) | 33.4 (1020) | 175.2 (1958) | 159.3 (1817) |
 
-`sacd_extract` is a generic x86-64 build of sacd-ripper's extractor; reader P is pysacd.
+`sacd_extract` is a generic x86-64 build of sacd-ripper's extractor, and reader P is pysacd 0.2 (GPL).
 Single-thread DST decoding cost on the 16-core machine: about 0.41 ms per 2-channel frame
 and 1.15 ms per 6-channel frame. On DST discs both readers keep every core busy, so the cost
 per frame decides the result. These figures are updated when the baseline readers change.
