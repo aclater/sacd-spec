@@ -38,7 +38,8 @@ that implements it MUST follow it.
    decimal. Ranges `[a, b)` include `a` and exclude `b`; ranges `[a, b]` include both ends.
 6. Bytes that a syntax table does not list, or lists as reserved, have no meaning of their
    own: a reader MUST NOT interpret them as fields. They still take part where a rule works on
-   whole sectors or byte ranges rather than on fields: the comparison of TOC copies (3.2), text
+   whole sectors or byte ranges rather than on fields: the comparison of area TOC copies
+   (specification 3, 3.2) and of master TOC copies (specification 1, 1.5.1), text
    strings that start or run into them (2.6.4), and audio sectors (4.2 item 4).
 7. Integer arithmetic on values read from an image MUST NOT overflow. A reader MUST use at
    least 64-bit arithmetic for byte positions (a 32-bit sector number multiplied by a sector
