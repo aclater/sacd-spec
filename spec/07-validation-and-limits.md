@@ -31,7 +31,8 @@ prevails over the summary tables here. The section references say where each rul
    so this bound is not proportional to the area TOC size, but it is a constant), plus one
    zero-skipping pass of at most `E` bytes per track; sector
    processing is at most one pass over the area's existing audio sectors (specification 4,
-   4.2) for each track or frame range the caller asks for, and a reader that produces an
+   4.2) for each track, frame range or stored frame list (specification 4, 4.6.1) the caller asks
+   for, and a reader that produces an
    area's tracks in increasing order of their start frames needs only one pass for all of them
    (specification 4, 4.5 item 4); and DST decoding of a frame is
    proportional to `NB x Nch` plus the frame length.
