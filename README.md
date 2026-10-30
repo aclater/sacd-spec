@@ -16,6 +16,7 @@ any SACD code can write a correct reader from this repository alone.
 | [spec/05-dst.md](spec/05-dst.md) | the complete DST frame syntax and decoding process |
 | [spec/06-ps3-protocol.md](spec/06-ps3-protocol.md) | the PS3 SACD Ripper network protocol (optional) |
 | [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
+| [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
 
@@ -61,15 +62,19 @@ decoded DSD.
 ## Status
 
 Version 1.0-draft. The behaviour specified for malformed input is deliberately conservative
-and deterministic, so that two conforming readers produce identical results on every image.
-Points that could not be specified with full confidence are listed in
+and deterministic: two conforming readers produce the same TOC, the same required warnings and
+the same audio for every image, with these stated exceptions, none of which the corpus
+exercises: strings containing the EUC-KR pair 0xA4D4 (specification 2, 2.6.3); a sector format
+chosen by the caller instead of detected (1.4); and optional (SHOULD) warnings and frame
+counts. Points that could not be specified with full confidence are listed in
 [PROVENANCE.md](PROVENANCE.md#open-points).
 
 ## Licences
 
 - The specifications and all other documentation: **Creative Commons Attribution 4.0
   International** (CC BY 4.0), see [LICENSE](LICENSE).
-- The conformance corpus (`corpus/`, images and manifest): **CC0 1.0 Universal** (public
+- The conformance corpus (`corpus/`, images and manifest) and the character-set tables
+  (`spec/charsets/`): **CC0 1.0 Universal** (public
   domain dedication), see [corpus/LICENSE](corpus/LICENSE).
 
 The test data is CC0 so that implementations under any licence can copy it into their own

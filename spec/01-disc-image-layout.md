@@ -106,4 +106,4 @@ these specifications.
 | Stored sector sizes | 2048, 2054, 2064 bytes |
 | LSN range | 0 to 2^32 - 1 (`u32`); only LSNs below `N` exist |
 | Master TOC position | LSN 510, 10 sectors |
-| Largest real disc | about 4.2 million sectors (dual-layer). Readers MUST NOT rely on any upper bound on `N`. |
+| Largest real disc | 4 173 824 sectors (dual-layer, 8.5 GB). A reader of image files MUST NOT rely on any upper bound on `N`. (A network client applies its own bound to the size a server reports, specification 6, 6.7.) |

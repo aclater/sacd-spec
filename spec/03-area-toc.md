@@ -301,7 +301,7 @@ Notes:
 1. Step 4.5 starts the search at `q + r`, the position of the string's terminator. When a
    string was cut at 4096 bytes there is no terminator there, so the search starts inside the
    string and the next "item" begins with a byte of that string. This is the normative result:
-   it keeps the work linear in `E` for any input.
+   it keeps the work for one track's items bounded by about `E` bytes for any input.
 2. Strings are bounded by the end of `Z`, not by the end of the `SACDTTxt` sector: a string
    that is not terminated within the sector continues into the following sectors.
 3. Text offsets may point anywhere in `Z`, including outside the `SACDTTxt` sector.

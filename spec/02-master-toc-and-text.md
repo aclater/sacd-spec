@@ -210,53 +210,59 @@ empty.
 The character set code's low 3 bits select the decoding. Higher bits are ignored, so a stored
 code of 0xFF selects set 7.
 
-| Code (low 3 bits) | Character set | Decoding |
-|---|---|---|
-| 0 | not assigned | ISO 8859-1 |
-| 1 | ISO 646 IRV (ASCII) | ISO 8859-1 (bytes 0x80 to 0xFF still decode) |
-| 2 | ISO 8859-1 | ISO 8859-1 |
-| 3 | Shift JIS for music (RIS-506) | Shift_JIS-X0213, see below |
-| 4 | KS C 5601-1987 (KS X 1001) | EUC-KR |
-| 5 | GB 2312-80 | EUC-CN (GB 2312) |
-| 6 | Big5 | Big5 |
-| 7 | not assigned | ISO 8859-1 |
+| Code (low 3 bits) | Character set | Decoding | Table |
+|---|---|---|---|
+| 0 | not assigned | ISO 8859-1 | none needed |
+| 1 | ISO 646 IRV (ASCII) | ISO 8859-1 (bytes 0x80 to 0xFF still decode) | none needed |
+| 2 | ISO 8859-1 | ISO 8859-1 | none needed |
+| 3 | Shift JIS for music (RIS-506) | Shift_JIS-X0213 (JIS X 0213:2000, Shift encoding) | [charsets/set3-shift-jisx0213.txt](charsets/set3-shift-jisx0213.txt) |
+| 4 | KS C 5601-1987 (KS X 1001) | EUC-KR | [charsets/set4-euc-kr.txt](charsets/set4-euc-kr.txt) |
+| 5 | GB 2312-80 | EUC-CN | [charsets/set5-euc-cn.txt](charsets/set5-euc-cn.txt) |
+| 6 | Big5 | Big5 | [charsets/set6-big5.txt](charsets/set6-big5.txt) |
+| 7 | not assigned | ISO 8859-1 | none needed |
 
 1. **ISO 8859-1** maps each byte value `b` to the code point U+00`b` (0x00 to 0xFF). It
    never fails.
-2. **Shift_JIS-X0213** is the Shift encoding of JIS X 0213:2000 (planes 1 and 2), with these
-   single-byte mappings:
-   - 0x00 to 0x7F: JIS X 0201 Roman. This equals ASCII except that **0x5C decodes to
-     U+00A5 (yen sign)** and **0x7E decodes to U+203E (overline)**.
-   - 0xA1 to 0xDF: half-width katakana, U+FF61 to U+FF9F.
-   - Lead bytes 0x81 to 0x9F and 0xE0 to 0xFC start a two-byte character; trail bytes are
-     0x40 to 0x7E and 0x80 to 0xFC.
-   - Some JIS X 0213 characters decode to two code points (a base and a combining mark); a
-     reader MUST produce both.
-   - A reader MAY also decode the characters added by JIS X 0213:2004. The corpus does not
-     test them.
-3. **EUC-KR**: bytes 0x00 to 0x7F are ASCII; a two-byte character is a lead byte 0xA1 to 0xFE
-   followed by a trail byte 0xA1 to 0xFE, mapped by KS X 1001. Vendor extensions (such as the
-   Unified Hangul Code) are not required.
-4. **EUC-CN**: bytes 0x00 to 0x7F are ASCII; a two-byte character is a lead byte 0xA1 to 0xF7
-   followed by a trail byte 0xA1 to 0xFE, mapped by GB 2312. Extensions (GBK, GB 18030) are not
-   required.
-5. **Big5**: bytes 0x00 to 0x7F are ASCII; a two-byte character is a lead byte 0xA1 to 0xF9
-   followed by a trail byte 0x40 to 0x7E or 0xA1 to 0xFE. Vendor extensions (ETEN, CP950,
-   HKSCS) are not required.
+2. **Sets 3 to 6** are defined by their mapping tables in [charsets/](charsets/). The tables
+   are normative and complete: each lists every single byte and every two-byte sequence that is
+   a character of the set, with the code point (or, for 25 entries of set 3, the two code points:
+   a base and a combining mark) it decodes to. Published mappings of these standards disagree at
+   some positions; where they do, the table decides. A reader MUST decode exactly by the table.
+   Notable consequences:
+   - Set 3 decodes the single bytes 0x5C to U+00A5 (yen sign) and 0x7E to U+203E (overline),
+     and 0xA1 to 0xDF to the half-width katakana U+FF61 to U+FF9F. Its two-byte 0x815F decodes
+     to U+005C and 0x8160 to U+301C.
+   - Set 5 decodes 0xA1A4 to U+30FB and 0xA1AA to U+2015.
+   - Set 6 decodes 0xA145 to U+2022, 0xA1C2 to U+203E and 0xA244 to U+00A5.
+   - Set 4 includes 0xA2E6 (U+20AC) and 0xA2E7 (U+00AE).
+3. **Extensions are not part of the sets.** Byte sequences that only vendor extensions define
+   (Unified Hangul Code for set 4, GBK or GB 18030 for set 5, CP950, ETEN additions beyond the
+   table or HKSCS for set 6, the characters added by JIS X 0213:2004 or CP932 extensions for
+   set 3) are not in the tables and are therefore invalid (2.6.3). A reader MUST NOT decode
+   them as characters.
 
-### 2.6.3 Invalid byte sequences
+### 2.6.3 Decoding and invalid byte sequences
 
-1. A byte sequence that is invalid in the selected character set (a lead byte with a bad or
-   missing trail byte, an unmapped code, a byte that cannot start a character) MUST be
-   replaced by U+FFFD. Decoding MUST continue after it.
-2. How many U+FFFD a given invalid sequence produces, and whether a byte that follows an
-   invalid lead byte is decoded again on its own, is implementation-defined. The RECOMMENDED
-   behaviour is that of the WHATWG Encoding Standard for the corresponding decoder: one U+FFFD
-   per invalid sequence, and an ASCII byte that follows an invalid lead byte is decoded again
-   as itself.
-3. Decoding MUST NOT produce surrogate code points, and MUST NOT fail.
-4. Because of item 2, the conformance corpus checks such strings only up to the first U+FFFD
-   (see [../corpus/README.md](../corpus/README.md)).
+For sets 3 to 6, a reader decodes a byte string from its first byte to its last, repeating the
+following at the current position `i`. A **pair** is the two bytes at `i` and `i + 1`; there is
+no pair at the last byte.
+
+1. If there is a pair and the table lists it, emit its code points and advance by 2.
+2. Otherwise, for set 3 only: if there is a pair and it is one of the **reserved pairs** 0x879F,
+   0x889E, 0x9873, 0x989E, 0xEAA5, 0xEFF8, 0xEFF9, 0xEFFA, 0xEFFB, 0xEFFC, emit one U+FFFD and
+   advance by 2. (These are the positions of characters added by JIS X 0213:2004.)
+3. Otherwise, if the table lists the single byte at `i`, emit its code point and advance by 1.
+4. Otherwise emit one U+FFFD and advance by 1.
+
+Consequently an invalid lead byte produces one U+FFFD and the byte after it is decoded again
+from step 1, and a string cut in the middle of a two-byte character ends with U+FFFD.
+
+One exception: in set 4, the pair 0xA4D4 (HANGUL FILLER) can begin an 8-byte composition
+sequence defined by KS X 1001:1998. How a reader decodes a string containing the pair 0xA4D4 is
+**implementation-defined**; it is RECOMMENDED to treat 0xA4D4 like any other unlisted pair
+(steps 3 and 4). The corpus contains no such string.
+
+Decoding never fails and never produces surrogate code points.
 
 ### 2.6.4 Text strings
 

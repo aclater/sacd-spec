@@ -22,8 +22,11 @@ MUST follow this specification. Conventions are in [00-conventions.md](00-conven
 1. TCP. The server listens on port **2002** by default. It accepts one client at a time
    (listen backlog 1).
 2. Each request and each response is one **message** (6.3), followed immediately by a single
-   byte 0x00. There is no length prefix: the 0x00 byte, which cannot start a field, ends the
-   message. Both directions use this framing.
+   byte 0x00. There is no length prefix. Because no field key can be 0 (6.3.2), a 0x00 byte
+   **in a key position** ends the message. Other 0x00 bytes occur freely inside field values (a
+   sector offset of 0 is sent as the byte 0x00, and sector data contains zeros), so a receiver
+   MUST parse the message field by field to find its end; it MUST NOT scan for the first 0x00
+   byte. Both directions use this framing.
 3. A client sends one request and reads its complete response before sending the next.
 4. The connection stays open across requests. After responding to a close request (6.4) the
    server closes the connection.
@@ -55,9 +58,15 @@ A message is a sequence of fields. Each field starts with a **key**, a varint wh
 | 5 | 4 bytes, little-endian |
 
 Field numbers are 1 or more, so no key is 0; a key byte of 0x00 is therefore the end-of-message
-marker of 6.2. This protocol's messages use wire types 0 and 2 only. A receiver MUST be able
-to skip fields of wire types 1 and 5, MUST treat any other wire type as a protocol error, and
-MUST ignore field numbers it does not know.
+marker of 6.2. This protocol's messages use wire types 0 and 2 only. A receiver:
+
+1. MUST skip fields of wire types 1 and 5 and fields with field numbers it does not know (after
+   reading their payload, which counts towards the limits of 6.7);
+2. MUST treat any other wire type (3, 4, 6, 7) as a protocol error;
+3. MUST treat a field number defined in 6.3.3 or 6.3.4 that arrives with a wire type other
+   than the one given there (for example the data field as a varint) as a protocol error;
+4. when a defined field occurs more than once in one message, MUST use its last occurrence
+   (the proto2 rule).
 
 ### 6.3.3 Request
 
@@ -82,7 +91,8 @@ MUST ignore field numbers it does not know.
 | 2 | 0 | result | signed 64-bit | see 6.4; negative values are 10-byte varints |
 | 3 | 2 | data | bytes | read responses only: the sectors read |
 
-A field that is absent has its default value: 0 for result, empty for data.
+A field that is absent has its default value: 0 for result, empty for data. A response without
+a response type field is a protocol error.
 
 ## 6.4 Requests and responses
 
@@ -93,8 +103,8 @@ A field that is absent has its default value: 0 for result, empty for data.
 | read sectors (offset `o`, count `n`) | read (3) | the number of sectors returned, `r` (0 to `n`), or -1 on a read error | exactly `r x 2048` bytes: sectors `o` to `o + r - 1` | 6.5 |
 | close disc | closed (2) | 0 | none | closes the disc, then the connection |
 
-A client opens the disc first. Requests other than open before a successful open fail with
-result -1 or are answered with no data.
+A client opens the disc first. Before a successful open, the server answers get disc size and
+read sectors with result -1 and no data, and close disc with result 0.
 
 ## 6.5 Read sizes
 
@@ -103,9 +113,13 @@ also never returns, in one response, sectors from both sides of an audio area bo
 decrypts each audio area separately.
 
 The server keeps a **block size**, an integer that persists between requests on one connection
-and starts at 0 when the connection opens. Let `[s1, e1]` be the audio LSN range (first and last
-audio LSN, specification 3) of the first area the server found when it opened the disc, and
-`[s2, e2]` that of the second; on a single-area disc `s2 = e2 = 0`. For a read at offset `o`
+and starts at 0 when the connection opens. When it opens the disc, the server reads its TOC
+(specifications 2 and 3) and takes the areas it yields **in slot order** (the area from the
+2-channel slot, then the area from the multichannel slot; a skipped area is left out). Let
+`[s1, e1]` be the audio LSN range (first and last audio LSN, specification 3) of the first such
+area and `[s2, e2]` that of the second; on a single-area disc `s2 = e2 = 0`. No other relation
+between the ranges is assumed: when they overlap or are out of order, the table below still
+applies row by row as written. For a read at offset `o`
 for `n` sectors, the server first updates the block size by the first row that matches:
 
 | Condition on `o` | New block size |
@@ -127,8 +141,8 @@ Consequences that clients MUST handle:
    returns `r = 0`, forever. A client MUST therefore make a read that matches a row (for
    example one sector at LSN 0, or the master TOC at LSN 510) as its first read on every
    connection, before reading anything after the audio area.
-3. A result of 0 sectors for a read that should have data is not progress. A client MUST NOT
-   loop on it without bound (6.7).
+3. A result of 0 sectors is never progress. A client MUST treat it as an error (6.7 item 5),
+   never retry it on the same connection without first making a read that sets the block size.
 
 When an encrypted range is first read, the server checks whether the disc is protected at all
 (some plain DSD discs are not) by examining bytes 16 to 23 of the first block. This affects
@@ -145,8 +159,8 @@ A typical client session:
 5. Read the area TOCs and audio sectors it needs, looping on short reads.
 6. Send close disc; the server closes the connection.
 
-A client that resumes after a dropped connection repeats steps 1 to 4 and SHOULD verify that
-the disc is the same (6.7 item 6) before continuing.
+A client that resumes after a dropped connection repeats steps 1 to 4 and MUST verify that
+the disc is the same (6.7 item 9) before continuing.
 
 ## 6.7 Client requirements for hostile servers
 
@@ -155,15 +169,32 @@ A client MUST treat the server as hostile. In particular:
 | No. | Requirement | Value |
 |---|---|---|
 | 1 | Bound every length-delimited field before allocating for it. A field longer than one full read plus a margin is a protocol error. | 512 x 2048 + 1024 = 1 049 600 bytes |
-| 2 | Bound the number of fields in one message. More is a protocol error. | 16 fields |
+| 2 | Bound the number of fields in one message, counting every field read, skipped ones included. More is a protocol error. | 16 fields |
 | 3 | Reject a varint longer than 10 bytes, or a 10-byte varint whose value exceeds 64 bits. | |
 | 4 | Require each response's type to match the request; otherwise it is a protocol error. | |
 | 5 | For a read of `n` sectors, require a result `r` with `1 <= r <= n` and a data field of exactly `r x 2048` bytes. Anything else (including more sectors than requested, or 0) is an error. | |
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
 | 7 | Bound the time per response: a deadline covering the whole response, not each receive, so that a server cannot trickle a response a byte at a time. | 60 s RECOMMENDED |
 | 8 | Bound reconnection attempts. | 3 in a row RECOMMENDED, with back-off |
-| 9 | After a reconnection, check that the disc size and the master TOC sectors are unchanged; if not, the disc changed and the copy MUST fail. | |
+| 9 | After a reconnection, check that the disc size and the master TOC sectors (LSN 510 to 519) are unchanged; if not, the disc changed and the transfer in progress (the sequence of reads the client was making) MUST fail with `network-disc-changed`. | |
 | 10 | Apply specifications 1 to 4 and 7 to the sectors received exactly as to an image file. In particular, every LSN taken from a TOC MUST be checked against the reported disc size before it is requested. | |
+
+### 6.7.1 Error outcomes
+
+Every failure of a client falls into one of these classes. A reader that implements this
+specification reports them with these codes (in addition to those of specification 7):
+
+| Code | Condition | Outcome |
+|---|---|---|
+| `network-connection-lost` | the connection could not be made, was closed by the server, or a response missed its deadline (item 7) | the client MAY reconnect, within the bound of item 8, and resume; when the bound is exhausted, the transfer fails with this code |
+| `network-protocol-error` | any violation of items 1 to 5, a malformed message (6.3), or a response of the wrong type | the transfer fails; the client MUST NOT reconnect to retry it |
+| `network-disc-error` | open disc returned a result other than 0, or get disc size a result below 1, or a read a result of -1 | the transfer fails; the client MAY report the result value |
+| `network-disc-too-large` | the reported disc size exceeds item 6 | the transfer fails |
+| `network-disc-changed` | item 9 | the transfer fails |
+
+A **transfer** is the sequence of requests a client makes to obtain the sectors it needs (for
+example the whole disc, or the TOCs and one area). When a transfer fails, any sectors already
+received MUST NOT be presented as a complete image.
 
 ## 6.8 Server requirements (for test servers)
 

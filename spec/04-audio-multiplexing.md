@@ -26,13 +26,13 @@ here are in [03-area-toc.md](03-area-toc.md).
 2. The reader processes the logical sectors `S0, S0 + 1, ..., S1'` in increasing LSN order,
    each exactly once. If `S0 > S1'` no sector is processed.
 3. Sectors past the end of the image are not an error: frames they would have carried are
-   missing (4.7).
+   missing (4.5 item 3, 4.6).
 4. The sectors in that range are processed as audio sectors whatever they contain. If the range
    covers TOC sectors or other non-audio data (possible in a hostile image), those bytes are
    parsed as audio sectors and yield whatever this specification defines for them.
 5. The result is defined as if every sector in the range is processed. A reader MAY stop
    early once it can prove that no later sector can change any frame it still has to produce
-   (4.6 item 4 gives one such case). The track start LSNs of specification 3 MUST NOT change
+   (4.5 item 4 gives one such case). The track start LSNs of specification 3 MUST NOT change
    the result: a reader that uses them to seek MUST still produce exactly the frames this
    specification defines.
 

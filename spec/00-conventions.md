@@ -20,7 +20,10 @@ that implements it MUST follow it.
    significant bit (MSB).
 2. Unless a specification says otherwise, every multi-byte integer stored in a disc image is
    unsigned and **big-endian** (most significant byte first).
-3. Field types in syntax tables:
+3. A field written as "bits a to b" of a byte or word (a < b) is the unsigned integer formed by
+   those bits, with bit b as its most significant bit and bit a as its least significant bit.
+   For example, "bits 5 to 7" of the byte 0xE4 is 7, and "bits 2 to 4" of it is 1.
+4. Field types in syntax tables:
 
    | Type | Size | Meaning |
    |---|---|---|
@@ -31,14 +34,14 @@ that implements it MUST follow it.
    | `bytes[n]` | n bytes | n bytes with no defined interpretation |
    | `tc` | 3 bytes | a timecode (0.5) |
 
-4. Offsets are byte offsets from the start of the structure the table describes, written in
+5. Offsets are byte offsets from the start of the structure the table describes, written in
    decimal. Ranges `[a, b)` include `a` and exclude `b`; ranges `[a, b]` include both ends.
-5. Bytes that a syntax table does not list, or lists as reserved, MUST be ignored by readers.
+6. Bytes that a syntax table does not list, or lists as reserved, MUST be ignored by readers.
    Their values never change an outcome.
-6. Integer arithmetic on values read from an image MUST NOT overflow. A reader MUST use at
+7. Integer arithmetic on values read from an image MUST NOT overflow. A reader MUST use at
    least 64-bit arithmetic for byte positions (a 32-bit sector number multiplied by a sector
    size exceeds 32 bits).
-7. `floor(x)` is the largest integer not greater than x. `min` and `max` have their usual
+8. `floor(x)` is the largest integer not greater than x. `min` and `max` have their usual
    meaning.
 
 ## 0.3 Sectors and LSNs
@@ -104,8 +107,8 @@ its diagnostic code.
 
 | Outcome | Meaning |
 |---|---|
-| **reject the image** | The reader reports an error with the stated **error code** and produces no TOC and no audio. |
-| **skip the area** | The area is left out of the TOC as if its master TOC pointer were zero. The reader emits a warning with the stated code and continues with the other area. |
+| **reject the image** | The reader reports an error with the stated **error code** and produces no TOC and no audio. Whether it also reports warnings it emitted before the rejection is not specified, and the corpus does not compare them. |
+| **skip the area** | The area is left out of the TOC and produces no audio. The reader emits a warning with the stated code and continues with the other area. Warnings already emitted for the area before it was skipped (for example `area-toc1-unreadable` or `track-text-type-unknown`) remain reported. |
 | **skip the track** | The track remains in the TOC, but the reader produces no audio for it and reports the stated code for it. |
 | **refuse the track** | As "skip the track", but the condition is an error rather than an empty track. Specification 7 says which codes are which. |
 | **replace the frame** | One audio frame is replaced by a fill pattern (0.6). Neighbouring frames are unaffected. |
