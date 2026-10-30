@@ -185,7 +185,9 @@ Written new, after the specifications and corpus. The benchmark program's interf
 method are new; the hash definition is referenced from corpus/README.md. The baseline table
 and the single-thread DST figures are measurements published in pysacd `docs/performance.md`
 (commit 8834da1), restated as numbers only: no implementation detail, profile or technique
-from any reader is described. Disc descriptions are characteristics only.
+from any reader is described. Disc descriptions are characteristics only. The baseline was
+updated with the figures pysacd `docs/performance.md` publishes at commit 8a179b5 (2026-10-30),
+again numbers only.
 
 ## Open points
 
