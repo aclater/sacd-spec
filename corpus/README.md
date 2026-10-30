@@ -52,7 +52,7 @@ The top level is an object:
 | `input` | string | path of the image, relative to the repository root |
 | `input_sha256` | string | SHA-256 of the image file, lower-case hex |
 | `input_bytes` | integer | size of the image file in bytes |
-| `frames` | array, optional | for DST cases, what each frame of an area contains (below) |
+| `frames` | array, optional | for some DST cases, what each frame of an area contains (below); its absence means nothing |
 | `expected` | object | the expected result (below) |
 
 `frames` entries are informative: `area` (slot), `frame` (frame number), `content` (prose),
@@ -126,7 +126,7 @@ Track object:
 | Key | Spec | Meaning |
 |---|---|---|
 | `number` | 3.9.1 | 1-based |
-| `start_lsn`, `length_lsn` | 3.7.1 | as stored |
+| `start_lsn`, `length_sectors` | 3.7.1 | start LSN and length in sectors, as stored |
 | `start_frame`, `duration_frames` | 3.7.2, 3.9.2 | frame numbers **after** clamping |
 | `start_flags`, `duration_flags` | 3.7.2 | the fourth byte of each timecode entry |
 | `isrc` | 3.7.3 | string, or null for no ISRC |
@@ -191,5 +191,5 @@ expected value.
 
 ## Size
 
-About 172 MB uncompressed, 129 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
+About 177 MB (169 MiB) uncompressed, 129 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
 sectors before the master TOC, which compress well, so the repository stays far smaller.
