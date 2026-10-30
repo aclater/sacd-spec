@@ -122,7 +122,14 @@ Warnings and errors are identified by the **diagnostic codes** in specification 
 MAY emit additional warnings. A reader MUST emit every warning these specifications require,
 with its code; how it presents them (log, list, callback) is not specified.
 
-## 0.9 Document map
+## 0.9 Symbols
+
+Single-letter symbols (`P`, `C`, `N`, `T`, `H`, `K`, `Q`, `L` and others) are local to the
+specification, and often to the section, that defines them. For example `C` is a channel count
+in specification 4 and the arithmetic decoder's code value in specification 5. When one
+specification uses a quantity from another, it names it in words.
+
+## 0.10 Document map
 
 | No. | Document | Content |
 |---|---|---|

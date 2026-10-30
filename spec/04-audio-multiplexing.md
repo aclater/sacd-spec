@@ -148,25 +148,28 @@ corpus does not require this warning.
 
 ## 4.5 Delivery and the timeline
 
-Delivered frames are placed on the area's **timeline**, which has one slot for each frame
+Delivered frames are placed on the area's **timeline**, which has one **position** for each frame
 number. The reader keeps a **next acceptable frame number** `a`, starting at 0 for the area.
 
 1. When a frame with frame number `t` is delivered:
-   - if `t >= a`, it is **accepted**: it fills slot `t`, and `a = t + 1`;
+   - if `t >= a`, it is **accepted**: it fills position `t`, and `a = t + 1`;
    - otherwise it is discarded.
-2. Consequently each slot holds at most one frame, the timeline is filled in increasing order,
+2. Consequently each position holds at most one frame, the timeline is filled in increasing order,
    and a frame whose timecode goes backwards or repeats is discarded. After a frame with a very
    large timecode is accepted, every later frame with a smaller timecode is discarded.
 3. Slots that no accepted frame fills are **missing**.
-4. Once a frame with number `t` has been accepted, no slot below `t + 1` can change. A reader
-   that needs only slots below some bound `u` MAY stop processing sectors as soon as it
-   delivers a frame with number `t >= u`: the result for slots below `u` is the same.
+4. Once a frame with number `t` has been accepted, no position below `t + 1` can change. A reader
+   that needs only positions below some bound `u` MAY stop processing sectors as soon as it
+   delivers a frame with number `t >= u`: the result for positions below `u` is the same.
+5. Frames held between delivery and output need memory. A reader MUST bound it: an accepted
+   frame is at most 65 536 bytes before decoding and `C x 4704` bytes after, and only frames
+   inside a track that is still to be produced need to be kept.
 
 ## 4.6 Frame contents
 
-The content of slot `t` is `C x 4704` bytes in interleaved layout (specification 0, 0.6):
+The content of timeline position `t` is `C x 4704` bytes in interleaved layout (specification 0, 0.6):
 
-| Slot state | Content |
+| Position state | Content |
 |---|---|
 | plain frame | the frame's bytes, unchanged (its size is exactly `C x 4704` by 4.4.2) |
 | DST frame, decoded successfully | the decoder output (specification 5) with `Nch = C` and the frame's bytes as input (its byte count is the frame length `FB`) |
@@ -182,10 +185,10 @@ its neighbours.
    and duration after the checks of specification 3, 3.9.2 (so `s_i + d_i` is at most the
    area's play time).
 2. The **audio of track `i` for channel `c`** is the concatenation, for each frame number `t`
-   from `s_i` to `s_i + d_i - 1` in order, of the 4704 bytes of channel `c` in slot `t`: bytes
-   `c, c + C, c + 2C, ...` of the slot's content. It is `d_i x 4704` bytes long, and each byte
+   from `s_i` to `s_i + d_i - 1` in order, of the 4704 bytes of channel `c` in position `t`: bytes
+   `c, c + C, c + 2C, ...` of the position's content. It is `d_i x 4704` bytes long, and each byte
    holds 8 samples, earliest in the MSB.
-3. Tracks may overlap; overlapping tracks share the same slots.
+3. Tracks may overlap; overlapping tracks share the same timeline positions.
 4. Frames between the end of one track and the start of the next (pauses), and frames outside
    every track, belong to no track. Informative: a reader that offers "tracks with pauses"
    attaches each pause to the track before it: the first track starts at frame 0 instead of

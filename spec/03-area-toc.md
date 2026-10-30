@@ -129,8 +129,8 @@ Sector 0 of `Z`:
    | Value | Name | Frames |
    |---|---|---|
    | 0 | DST | DST-coded (specification 5) |
-   | 2 | DSD 3 in 14 | plain DSD; three 2-channel frames fill 14 sectors |
-   | 3 | DSD 3 in 16 | plain DSD; three frames fill 16 sectors |
+   | 2 | DSD 3 in 14 | plain DSD (the name describes how 2-channel frames are packed; the code is also used, and valid, for multichannel areas) |
+   | 3 | DSD 3 in 16 | plain DSD |
 
    Other values are reported as stored and are not an error.
 2. The frame format is **informative**. Whether a given frame is DST-coded or plain is decided
@@ -246,7 +246,8 @@ At the recorded position `g`:
 
 ## 3.8 Track text (`SACDTTxt`)
 
-At the recorded position `b` of the first `SACDTTxt`:
+If the walk recorded no `SACDTTxt`, no track has text. Otherwise, at the recorded position `b`
+of the first `SACDTTxt`:
 
 | Offset from `b` | Size | Type | Content |
 |---|---|---|---|

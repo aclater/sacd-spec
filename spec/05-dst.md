@@ -81,6 +81,9 @@ be their number. The rest of the frame, `fs = 8 x FB - H` bits, is the arithmeti
 ### 5.2.1 Frame length
 
 1. A frame of 0 or 1 byte (`FB <= 1`) is invalid.
+
+(A "plain frame" here, `DST_coded` = 0, is a DST frame that carries uncoded DSD. It is not the
+same as a plain DSD frame of specification 4, which is never passed to this decoder.)
 2. Plain frame (`DST_coded` = 0): the header is exactly 1 byte. The output is the first
    `min(FB - 1, FL x Nch)` bytes after it, followed by zero bytes up to `FL x Nch` bytes when
    the frame is shorter. Extra bytes beyond `1 + FL x Nch` are ignored.
@@ -190,16 +193,18 @@ Semantics and validity:
 
 1. The width of each `table_index` is `bitlen(T)`, computed from the current `T` before it is
    read: width 1 for T = 1, 2 for T = 2 or 3, 3 for T = 4 to 7, 4 for T = 8 to 15, 5 for T = 16
-   to 31, 6 for T = 32 to 63. (T can exceed `2 x Nch` while the mapping is read, up to one more
-   than the number of segments; the limit is checked only at the end, item 5.)
+   to 31. (T can exceed `2 x Nch` while the mapping is read, but never the total number of
+   segments of all channels, at most 30; the limit is checked only at the end, item 5.)
 2. A value `v < T` reuses table v. A value `v = T` introduces a new table, and T increases
    by 1. A value `v > T` makes the frame **invalid**.
 3. Tables are therefore numbered in order of first use, scanning channel 0's segments, then
    channel 1's, and so on.
 4. With `same_map_all_ch` = 1: after channel 0's numbers are read, every channel must have the
    same number of segments as channel 0 in this segmentation, otherwise the frame is
-   **invalid**. Channel 0's numbers are then used for every channel. If `nseg[0] = 1`, the
-   mapping is the flag bit alone and every channel uses table 0.
+   **invalid**. Channel 0's numbers are then used for every channel. In particular, when every
+   channel has exactly one segment, the mapping is the flag bit alone and every channel uses
+   table 0; when channel 0 has one segment and another channel has more, the frame is
+   invalid.
 5. When the mapping is complete, the final T is the number of tables of this kind: `NF`
    filters or `NP` ptables. If `T > 2 x Nch` the frame is **invalid**. This check is made once,
    after the whole mapping.
@@ -492,10 +497,11 @@ Informative: the frame length on SACD is bounded by the reassembly limit of 65 5
    that follows annex 5.A decodes identically in all of them. In particular, encoders SHOULD
    keep the arithmetic code no longer than `NB x Nch` bits (falling back to a plain frame),
    SHOULD NOT use a ninth ptable segment, and SHOULD NOT append bytes after the codeword.
-2. Two to three extra zero bytes after a valid coded frame illustrate rule 16: because the
-   decoder's 12-bit window reads 11 bits past the last codeword bit, one appended zero byte is
-   always accepted, two are accepted only when the original padding was at most 2 bits, and
-   three are always rejected. Removing trailing zero bytes of the codeword is always accepted.
+2. For a frame produced as annex 5.A describes, rule 16 has these consequences: because the
+   decoder reads 11 bits past the last codeword bit, one appended zero byte is accepted, two
+   are accepted only when the original padding was at most 2 bits, and three are rejected.
+   Removing trailing zero bytes of the codeword is accepted. Other valid frames can leave up to
+   7 bits unread already, so for them even one appended byte can break rule 16.
 3. Real SACD streams use few of the optional features; the corpus exercises all of them.
 
 ## Annex 5.A (informative): producing valid frames
