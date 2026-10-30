@@ -64,8 +64,8 @@ decoded DSD.
 Version 1.0-draft. The behaviour specified for malformed input is deliberately conservative
 and deterministic: two conforming readers produce the same TOC, the same required warnings and
 the same audio for every image, with these stated exceptions, none of which the corpus
-exercises: strings containing the EUC-KR pair 0xA4D4 (specification 2, 2.6.3); a sector format
-chosen by the caller instead of detected (1.4); and optional (SHOULD) warnings. Frame counts
+exercises: a sector format chosen by the caller instead of detected (specification 1, 1.4),
+and optional (SHOULD) warnings. Frame counts
 are optional to report, but a reader that reports them reports the same values. Points that could not be specified with full confidence are listed in
 [PROVENANCE.md](PROVENANCE.md#open-points).
 

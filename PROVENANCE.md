@@ -65,7 +65,9 @@ formula from P-TOC.
   `cp950` and `big5hkscs`.
 - 2.6.3 (decoding and invalid sequences): new. The rule was checked to reproduce Python's
   replacement behaviour for those four codecs exactly on 800 000 random byte strings, apart from
-  the EUC-KR composition sequences beginning with 0xA4D4, which are left implementation-defined.
+  the EUC-KR composition sequences beginning with 0xA4D4. **Deviation:** Python's codec applies
+  KS X 1001:1998 composition to those; this specification forbids it (decided after the fourth
+  cold read, so that every reported value is deterministic). The corpus contains no such string.
 - 2.6.4 (text strings: 4096-byte bound, controls to space, spaces kept): P-TOC.
 - 2.6.5 (fixed text fields and the whitespace set W): P-TOC; W established from Python's
   definition of whitespace in the U+0000 to U+00FF range.
@@ -175,7 +177,8 @@ readers agree, but the choice may not match the Scarletbook standard, which was 
    0213:2000), including 0x5C as the yen sign and 0x7E as overline. The real RIS-506 table may
    differ from JIS X 0213 in details, and some discs may have been authored with plain Shift JIS
    or CP932 in mind; the tables in `spec/charsets/` fix one answer.
-3. **EUC-KR composition sequences** (beginning with 0xA4D4) are implementation-defined.
+3. **EUC-KR composition sequences** (beginning with 0xA4D4) are not composed; a disc that relies
+   on them shows filler and jamo replacement characters instead of syllables.
 4. **TOC-1 readable but invalid**: the area is skipped rather than falling back to TOC-2. This
    matches existing readers; a reader that falls back would be more forgiving.
 5. **Area kind versus slot**: the kind comes from the signature, so a disc can report two areas

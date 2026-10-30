@@ -130,7 +130,9 @@ A locale entry is 4 bytes:
 
 1. The **language** is the two bytes mapped one-to-one to the code points U+0000 to U+00FF
    (ISO 8859-1), with every trailing U+0000 and U+0020 removed (from the end only). It may be
-   empty. It is not validated.
+   empty. It is not validated, and control characters are not replaced: the bytes 0x00 0x65
+   give the two-character string U+0000 U+0065, which a reader MUST report as such (a reader
+   that stores strings NUL-terminated must take care).
 2. The **character set code** is reported as the stored byte (0 to 255). The character set
    actually used for decoding is the stored byte's low 3 bits (2.6.2).
 
@@ -231,7 +233,7 @@ code of 0xFF selects set 7.
    a character of the set, with the code point (or, for 25 entries of set 3, the two code points:
    a base and a combining mark) it decodes to. Published mappings of these standards disagree at
    some positions; where they do, the table decides. A reader MUST decode exactly by the table
-   and the rule of 2.6.3, with the single exception stated there for the EUC-KR pair 0xA4D4.
+   and the rule of 2.6.3.
    Notable consequences:
    - Set 3 decodes the single bytes 0x5C to U+00A5 (yen sign) and 0x7E to U+203E (overline),
      and 0xA1 to 0xDF to the half-width katakana U+FF61 to U+FF9F. Its two-byte 0x815F decodes
@@ -261,12 +263,10 @@ no pair at the last byte.
 Consequently an invalid lead byte produces one U+FFFD and the byte after it is decoded again
 from step 1, and a string cut in the middle of a two-byte character ends with U+FFFD.
 
-One exception: in set 4, the pair 0xA4D4 (HANGUL FILLER) can begin an 8-byte composition
-sequence defined by KS X 1001:1998. When the procedure above reaches a position `i` whose pair
-is 0xA4D4, how the rest of the string from `i` is decoded is **implementation-defined**; the
-part before `i` is decoded as above. It is RECOMMENDED to treat 0xA4D4 like any other unlisted
-pair (steps 3 and 4): 0xA4 then yields U+FFFD and decoding continues at the 0xD4, which may
-pair with the byte after it. The composition rules themselves
+In set 4, the pair 0xA4D4 (HANGUL FILLER) can begin an 8-byte composition sequence defined
+by KS X 1001:1998. Readers MUST NOT apply that composition: 0xA4D4 is not in the table, so it
+is decoded like any other unlisted pair (steps 3 and 4). The 0xA4 yields U+FFFD and decoding
+continues at the 0xD4, which may pair with the byte after it. The composition rules themselves
 are outside these specifications. The corpus contains no such string.
 
 Decoding never fails and never produces surrogate code points.

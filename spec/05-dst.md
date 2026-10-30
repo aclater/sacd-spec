@@ -81,14 +81,15 @@ be their number. The rest of the frame, `fs = 8 x FB - H` bits, is the arithmeti
 ### 5.2.1 Frame length
 
 1. A frame of 0 or 1 byte (`FB <= 1`) is invalid.
-
-(A "plain frame" here, `DST_coded` = 0, is a DST frame that carries uncoded DSD. It is not the
-same as a plain DSD frame of specification 4, which is never passed to this decoder.)
 2. Plain frame (`DST_coded` = 0): the header is exactly 1 byte. The output is the first
    `min(FB - 1, FL x Nch)` bytes after it, followed by zero bytes up to `FL x Nch` bytes when
    the frame is shorter. Extra bytes beyond `1 + FL x Nch` are ignored.
 3. Coded frame: if the header needs more bits than the frame has (`H > 8 x FB`), the frame is
    invalid. A header that ends exactly at the end of the frame (`fs = 0`) is valid.
+
+A "plain frame" in this specification (`DST_coded` = 0) is a DST frame that carries uncoded
+DSD. It is not the same as a plain DSD frame of specification 4, which is never passed to this
+decoder.
 
 ## 5.3 Coded frame syntax
 
@@ -193,8 +194,9 @@ Semantics and validity:
 
 1. The width of each `table_index` is `bitlen(T)`, computed from the current `T` before it is
    read: width 1 for T = 1, 2 for T = 2 or 3, 3 for T = 4 to 7, 4 for T = 8 to 15, 5 for T = 16
-   to 31. (T can exceed `2 x Nch` while the mapping is read, but never the total number of
-   segments of all channels, at most 30; the limit is checked only at the end, item 5.)
+   to 31, 6 for T = 32 to 63. (T can exceed `2 x Nch` while the mapping is read, but never the
+   total number of segments of all channels: at most 30 for filters and 48 for ptables. The
+   limit is checked only at the end, item 5.)
 2. A value `v < T` reuses table v. A value `v = T` introduces a new table, and T increases
    by 1. A value `v > T` makes the frame **invalid**.
 3. Tables are therefore numbered in order of first use, scanning channel 0's segments, then
@@ -495,8 +497,9 @@ Informative: the frame length on SACD is bounded by the reassembly limit of 65 5
 
 1. Other decoders in circulation differ on frames that no correct encoder produces. A stream
    that follows annex 5.A decodes identically in all of them. In particular, encoders SHOULD
-   keep the arithmetic code no longer than `NB x Nch` bits (falling back to a plain frame),
-   SHOULD NOT use a ninth ptable segment, and SHOULD NOT append bytes after the codeword.
+   keep the arithmetic code no longer than `NB x Nch` bits (falling back to a plain frame)
+   and SHOULD NOT append bytes after the codeword. (A ninth ptable segment is not available at
+   all: it makes the frame invalid, 5.3.2.)
 2. For a frame produced as annex 5.A describes, rule 16 has these consequences: because the
    decoder reads 11 bits past the last codeword bit, one appended zero byte is accepted, two
    are accepted only when the original padding was at most 2 bits, and three are rejected.
@@ -552,24 +555,24 @@ bit y.
 
 ### 5.A.6 Arithmetic encoder
 
-State: `Lo`, a non-negative integer of unbounded precision; `A`, 12 bits; `K`, the number of
-renormalisation shifts so far. Start with `Lo = 0`, `A = 4095`, `K = 0`.
+State: `Lo`, a non-negative integer of unbounded precision; `A`, 12 bits; `n_s`, the number of
+renormalisation shifts so far. Start with `Lo = 0`, `A = 4095`, `n_s = 0`.
 
 To encode symbol e with probability p: compute Q, `w0` and `w1` from A as in 5.5.7. If e = 1
 set `A = w1`. If e = 0 set `Lo = Lo + w1` and `A = w0`. Then while `A < 2048`:
-`A = 2 x A`, `Lo = 2 x Lo`, `K = K + 1`.
+`A = 2 x A`, `Lo = 2 x Lo`, `n_s = n_s + 1`.
 
-The decoder's register satisfies `C = floor(V x 2^K) - Lo` with
-`V = sum over i >= 1 of cb[i] x 2^(12 - i)`; intervals `[Lo, Lo + A) / 2^K` are nested
+The decoder's register satisfies `C = floor(V x 2^n_s) - Lo` with
+`V = sum over i >= 1 of cb[i] x 2^(12 - i)`; intervals `[Lo, Lo + A) / 2^n_s` are nested
 starting from `[0, 4095)`, so a final V in the last interval decodes every symbol. Adding `w1`
 can carry into bits already produced; propagate the carry towards `cb[1]` (it never reaches
-`cb[0]`, because `Lo < 2^(12 + K)`).
+`cb[0]`, because `Lo < 2^(12 + n_s)`).
 
 Termination: after the last symbol, with interval `[Lo, Lo + A)` and `A >= 2048`, choose
 `Mv = 2^11 x ceil(Lo / 2^11)`, which lies in the interval. The codeword is `cb[0] = 0` followed
-by the `K + 1` bits of `floor(Mv / 2^11)`, MSB first. Its length is `K + 2` bits.
+by the `n_s + 1` bits of `floor(Mv / 2^11)`, MSB first. Its length is `n_s + 2` bits.
 
 Padding: with H header bits and a codeword of n bits, choose `FB = ceil((H + n) / 8)` and fill
-the remaining `8 x FB - H - n` bits with 0. The decoder ends with `ptr = 13 + K` and the frame
-has `fs <= K + 9` code bits, so rule 16 is satisfied. If H already fills the frame, still emit
+the remaining `8 x FB - H - n` bits with 0. The decoder ends with `ptr = 13 + n_s` and the frame
+has `fs <= n_s + 9` code bits, so rule 16 is satisfied. If H already fills the frame, still emit
 at least `cb[0]`.
