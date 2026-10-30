@@ -69,7 +69,8 @@ optional) and the same audio; for a rejected image they produce the same error c
 covered by that promise: a sector format chosen by the caller instead of detected
 (specification 1, 1.4); optional (SHOULD or MAY) warnings, warnings under codes of the reader's
 own, and warnings emitted before a rejection; and, over the network, the cases specification 6
-declares unspecified. Frame counts
+declares unspecified, and the choice of network error code and retry policy, which it only
+recommends. Frame counts
 are recommended (SHOULD) rather than required, and a reader that reports them reports the same
 values. Points that could not be specified with full confidence are listed in
 [PROVENANCE.md](PROVENANCE.md#open-points).
