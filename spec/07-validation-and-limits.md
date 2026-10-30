@@ -18,7 +18,7 @@ prevails over the summary tables here. The section references say where each rul
    of the image before making it. No value read from an image may, by itself, make a reader
    allocate more than: 128 sectors for each of the two copies of an area TOC, 65 536 bytes for a frame under assembly,
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
-   length, which 7.5 bounds by 7 frames of at most `6 x 4704` bytes per existing audio sector
+   length (and the same for a frame range, specification 4, 4.7.1), which 7.5 bounds by 7 frames of at most `6 x 4704` bytes per existing audio sector
    (about 100 times the size of the area's audio sectors), the frames held between delivery
    and output (specification 4, 4.5 item 5), and diagnostics: each warning is of bounded size,
    and their number is bounded by a constant per structure of these specifications plus at most
@@ -205,7 +205,8 @@ error code of 7.7.1 is compared.
 
 ### 7.7.4 Per-track outcomes
 
-These codes are reported per track as the reason a track has no audio. They are not
+These codes are reported per track (or per frame range, specification 4, 4.7.1 item 4) as
+the reason a track has no audio. They are not
 warnings: they are not part of the warning set of 7.7.3, and a reader that also reports them
 through its warning mechanism must not let them count as warnings for comparison.
 
@@ -217,7 +218,7 @@ through its warning mechanism must not let them count as warnings for comparison
 
 ### 7.7.5 Per-frame outcomes
 
-Per-frame outcomes have no warning code requirement. A reader SHOULD count, per track, the
+Per-frame outcomes have no warning code requirement. A reader SHOULD count, per track (and per frame range), the
 frames that were missing (filled with 0x69) and the DST frames that were invalid (filled with
 0x55); the corpus manifest gives both counts.
 

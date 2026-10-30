@@ -113,6 +113,10 @@ formula from P-TOC.
   this specification in answer to issue #5.
 - 4.5 (timeline, next acceptable frame number): P-ENGINE (frame staging). The equivalence of
   early stopping (4.5 item 4) was derived for this specification.
+- 4.6.1 (stored content, DST equivalents) and 4.7.1 (frame ranges, play range, tracks with
+  pauses) were written for this specification in answer to issues #16 and #17, from
+  specifications 4 and 5 alone; no source was consulted. 4.7.1 item 5 makes exact the formerly
+  informative description of tracks with pauses in 4.7 item 4, which came from P-TOC.
 - 4.6 (frame contents and fills): P-ENGINE, P-DST.
 - 4.7 (tracks as frame ranges; pauses informative): P-TOC (track ranges with and without
   pauses), P-ENGINE.
@@ -184,6 +188,20 @@ restated in answer to issue #18.
   configured to follow specification 4 where it deviates (see 4.2 and 4.8 above), mapping
   pysacd's warning texts to the codes of specification 7. Hashes of the DST feature cases were
   checked against the encoder's input signal.
+- Added in answer to issues #15, #16 and #17, with pysacd at commit eb33e44 (2026-10-30). Its
+  generator and encoder files (P-GEN, P-DSTENC) are unchanged from 8834da1, and only they were
+  used. Its engine was used only as a cross-check, as described below.
+  - **Cases:** `dst-features-1ch`, `-3ch` and `-4ch` (P-DSTENC feature frames, plus one invalid
+    frame and a frame record patched to repeat a timecode); `dsd-1ch`, `-3ch` and `-4ch`; and
+    `dsd-channels-mismatch`. At 1 channel, four features that P-DSTENC builds with more than
+    2 tables were given equivalent segmentations with at most 2 tables.
+  - **Values:** expected values were computed as for the other cases. The new manifest keys
+    (`play_range`, `tracks_with_pauses`, `stored_frames`) were computed for every case by
+    checkers written from specifications 1 to 5 only.
+  - **Checks:** those checkers first reproduced every existing track value, including every DST
+    track. The range hashes were then compared with pysacd's engine run on the same ranges, and
+    agree everywhere except the two ranges containing the rule-17 frame of
+    `dst-code-all-ones`.
 - The generator scripts are kept outside this repository.
 
 ### benchmarks/README.md

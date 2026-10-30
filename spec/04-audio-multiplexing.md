@@ -175,7 +175,7 @@ number. The reader keeps a **next acceptable frame number** `a`, starting at 0 f
    delivers a frame with number `t >= u`: the result for positions below `u` is the same.
 5. Frames held between delivery and output need memory. A reader MUST bound it: an accepted
    frame is at most 65 536 bytes before decoding and `C x 4704` bytes after, and only frames
-   inside a track that is still to be produced need to be kept.
+   inside a track or frame range (4.7.1) that is still to be produced need to be kept.
 
 ## 4.6 Frame contents
 
@@ -191,6 +191,37 @@ The content of timeline position `t` is `C x 4704` bytes in interleaved layout (
 A DST frame is decoded independently of every other frame. An invalid frame does not affect
 its neighbours.
 
+### 4.6.1 Stored content and DST equivalents
+
+A reader MAY offer timeline positions without decoding them, for example to write DST frames
+unchanged into a file format that carries them.
+
+1. The **stored content** of position `t` is one of:
+   - **DST**, with the bytes of the accepted DST frame (1 to 65 536 bytes, 4.4.3);
+   - **plain**, with the `C x 4704` bytes of the accepted plain frame (4.4.2);
+   - **missing**, when no frame was accepted at `t` (4.5 item 3).
+
+   These are exactly the frames 4.4 and 4.5 accept; nothing is decoded. A reader that offers
+   stored content counts missing positions as 4.6 does. It does not report invalid DST frames,
+   because validity (specification 5, 5.6) is known only by decoding. The checks of 4.8 item 1
+   apply: no stored content is offered for an area whose channel count is not 1 to 6.
+2. Each position has a **DST equivalent**: a DST frame (specification 5) that decodes with
+   `Nch = C` to exactly the content 4.6 gives the position.
+   - For DST, it is the stored bytes.
+   - For plain, it is the byte 0x00 followed by the stored bytes.
+   - For missing, it is the byte 0x00 followed by `C x 4704` bytes of 0x69.
+
+   The byte 0x00 is a plain DST frame header (`DST_coded` = 0, stuffing 0), so by
+   specification 5, 5.2.1 item 2 the frame decodes to the bytes that follow it.
+3. A reader that writes the DST equivalents of a track's or a frame range's positions produces
+   output whose decoding (specification 5, then 4.7 item 2) is exactly that track's or range's
+   audio.
+4. Informative: an invalid DST frame's stored bytes decode, by 4.6, to the 0x55 fill. Decoders
+   outside these specifications may treat such frames differently (specification 5, 5.8
+   item 1). A reader that writes DST equivalents for such a decoder MAY decode each DST frame
+   and, if it is invalid, write the byte 0x00 followed by `C x 4704` bytes of 0x55 instead,
+   which decodes to the same content.
+
 ## 4.7 Tracks
 
 1. Track `i` covers the frame numbers `[s_i, s_i + d_i)`, where `s_i` and `d_i` are its start
@@ -202,11 +233,36 @@ its neighbours.
    holds 8 samples, earliest in the MSB.
 3. Tracks may overlap; overlapping tracks share the same timeline positions.
 4. Frames between the end of one track and the start of the next (pauses), and frames outside
-   every track, belong to no track. Informative: a reader that offers "tracks with pauses"
-   attaches each pause to the track before it: the first track starts at frame 0 instead of
-   its own start, every other track keeps its own start, and every track ends at the start of
-   the track with the next number (the last track at the play time) instead of at its own end, but never before
-   its own end. The corpus checks only the ranges of item 1.
+   every track, belong to no track. A reader that offers "tracks with pauses" uses the ranges
+   of 4.7.1 item 5.
+
+### 4.7.1 Frame ranges
+
+1. The **play range** of an area is the frame numbers `[0, P)`, where `P` is the frame number
+   of the total area play time (specification 3, 3.3). Accepted frames numbered `P` or more
+   belong to no play range, and no range of this section produces them, but they still take
+   part in acceptance (4.5).
+2. A reader MAY produce the audio of any **frame range** `[a, b)` of an area with
+   `0 <= a <= b <= P`, as the caller asks. Its audio for channel `c` is defined exactly as in
+   4.7 item 2, with `a` and `b` in place of `s_i` and `s_i + d_i`. Track `i`'s own audio is the
+   range `[s_i, s_i + d_i)`.
+3. A request for a range with `a > b` or `b > P` is a caller error, not an outcome of the
+   image. A reader MUST NOT produce audio for it; how it reports the error is its own choice.
+4. The checks of 4.8 apply to a range as to a track, with `b - a` as the duration and `b` as
+   the end frame: refuse with `channel-count-unsupported`; skip with `track-empty` when
+   `a = b`; refuse with `track-exceeds-capacity` when `b > Q`.
+5. The **track with pause** of track number `i` is the range `[a_i, b_i)`, where:
+   - `a_i = 0` for track 1, and `a_i = s_i` for every other track;
+   - `b_i = max(s_i + d_i, s_j)` when the track numbered `j = i + 1` exists, and
+     `b_i = max(s_i + d_i, P)` for the last track (which is `P`, by specification 3, 3.9.2).
+
+   Here `s_i` and `d_i` are as in 4.7 item 1, after the checks of 3.9.2. Tracks with pauses
+   attach each pause to the track before it, and the frames before the first track to the
+   first track. When tracks overlap or are out of order, the ranges given by these formulas
+   may overlap; they are used as they are. Item 4 applies to each of them, so a track with
+   duration 0 can still have a track with pause that produces audio.
+6. A reader SHOULD report, for each range it produces, how many of its positions were
+   missing and how many were invalid DST frames.
 
 ## 4.8 When no audio is produced
 
@@ -226,7 +282,8 @@ make a reader produce hours of fill from a few sectors. The bound applies to the
 frame number, not to its length.
 
 Otherwise the track's audio is produced as 4.7 says, and the reader SHOULD report, per track,
-how many of its frames were missing and how many were invalid DST frames.
+how many of its frames were missing and how many were invalid DST frames. Frame ranges
+(4.7.1) are checked in the same way (4.7.1 item 4).
 
 ## 4.9 Limits
 
