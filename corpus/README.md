@@ -86,11 +86,11 @@ Disc level (specification 2):
 | `version` | 2.3 | [major, minor] |
 | `album_set_size`, `album_sequence_number` | 2.3.1 | as stored |
 | `album_catalog_number`, `disc_catalog_number` | 2.6.5 | fixed text fields (may be empty) |
-| `album_genres`, `disc_genres` | 2.4 | 4 objects each, `{category, genre}` |
+| `album_genres`, `disc_genres` | 2.4 | 4 objects each, `{category, genre}`: `category` is the genre table byte and `genre` the genre index byte |
 | `hybrid` | 2.3 | boolean, bit 7 of offset 80 |
 | `date` | 2.3.2 | `{year, month, day}` as stored |
 | `locales` | 2.5.2 | reported list of `{language, charset}`; `charset` is the stored byte |
-| `text` | 2.5.4 | object mapping item names to strings; absent items are left out |
+| `text` | 2.5.4 | object mapping item names to strings; absent items are left out; always present, `{}` when there is no text |
 | `manufacturer_sector` | 2.7 | boolean, whether `SACD_Man` is present |
 | `areas` | 3.1 | the areas in slot order |
 
@@ -118,7 +118,7 @@ Area object (specification 3):
 | `track_offset` | 3.3 | as stored |
 | `audio_start_lsn`, `audio_end_lsn` | 3.3 | as stored |
 | `locales` | 3.5 | reported list of `{language, charset}` |
-| `text` | 3.6 | object with `description`, `copyright`, `description_phonetic`, `copyright_phonetic` when present |
+| `text` | 3.6 | object with `description`, `copyright`, `description_phonetic`, `copyright_phonetic` when present; always present, `{}` when there is none |
 | `tracks` | 3.9 | array of track objects |
 
 Track object:
@@ -131,7 +131,7 @@ Track object:
 | `start_flags`, `duration_flags` | 3.7.2 | the fourth byte of each timecode entry |
 | `isrc` | 3.7.3 | string, or null for no ISRC |
 | `genre` | 3.7.3 | `{category, genre}`, or null when the area has no `SACD_IGL` |
-| `text` | 3.8 | object mapping item names to strings: `title`, `performer`, `songwriter`, `composer`, `arranger`, `message`, `extra_message`, and each with `_phonetic` appended |
+| `text` | 3.8 | object mapping item names to strings: `title`, `performer`, `songwriter`, `composer`, `arranger`, `message`, `extra_message`, and each with `_phonetic` appended; always present, `{}` when there is none |
 
 ### Audio array
 
