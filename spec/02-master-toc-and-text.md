@@ -25,6 +25,7 @@ The master TOC is 10 consecutive logical sectors starting at LSN 510:
 3. If the version major number (2.3, offset 8) is greater than 1, **reject the image** with
    `master-toc-version-unsupported`. Every minor number is accepted, and major number 0 is
    accepted.
+   Items 1 to 3 are checked in that order; the first that fails decides the error code.
 4. The remaining fields are read as 2.3 to 2.7 describe. None of them rejects the image. An
    image whose master TOC passes items 1 to 3 is rejected later only if no area is readable
    (`no-audio-areas`, specification 3, 3.1).

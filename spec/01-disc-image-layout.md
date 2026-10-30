@@ -80,7 +80,7 @@ these specifications.
    identical.
 2. A reader MUST read the master TOC from LSN 510. Its outcome (accepted, rejected, and every
    value) MUST be exactly what LSN 510 to 519 yield. A reader MAY compare the copies and warn
-   when they differ, but MUST NOT substitute a copy for LSN 510.
+   `master-toc-copies-differ` when they differ, but MUST NOT substitute a copy for LSN 510.
 
 ### 1.5.2 Areas
 

@@ -139,7 +139,8 @@ Sector 0 of `Z`:
 3. The sample frequency code 4 means 64 x 44 100 = 2 822 400 Hz. No other code is defined. A
    reader reports the stored code; whatever its value, the frame structure (4704 bytes per
    channel per 1/75 s) is unchanged and audio is decoded as DSD64. A reader SHOULD warn when the
-   code is not 4; the corpus does not require that warning.
+   code is not 4, with the code `sample-frequency-unknown`; the corpus does not require that
+   warning.
 
 ## 3.5 Locales and the text language
 
@@ -238,6 +239,8 @@ At the recorded position `g`:
 | 3068 | 4 | | reserved |
 | 3072 + 4i | 4 | genre | genre of track i (specification 2, 2.4) |
 
+Only entries `i < track count` are read.
+
 1. The ISRC is the fixed text field of the 12 bytes. If it is empty, the track has no ISRC.
    An ISRC is reported as decoded; its syntax (`CCXXXYYNNNNN`) is not validated.
 2. If a `SACD_IGL` was recorded and the track count is at least 1, the structure MUST lie
@@ -270,8 +273,9 @@ Each item is:
 | 1 | 1 | | reserved (0x20 on real discs) |
 | 2 | | | text string, ending with 0x00 |
 
-Items are separated by zero or more 0x00 bytes of padding. The next item starts at the first
-non-zero byte after the string's terminating 0x00.
+Items are separated by zero or more 0x00 bytes of padding, so on a well-formed disc the next
+item starts at the first non-zero byte after the string's terminating 0x00. The exact rule,
+which also covers strings with no terminator, is step 4.5 of 3.8.1.
 
 | Type | Item | Type | Item |
 |---|---|---|---|
