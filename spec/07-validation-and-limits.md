@@ -18,11 +18,13 @@ specifications; report it. The section references say where each rule is defined
    allocate more than: 128 sectors for an area TOC, 65 536 bytes for a frame under assembly,
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
    length, which 7.5 bounds by the image size.
-3. A reader MUST terminate on every input, in time at most proportional to the image size
-   (plus the size of the audio it produces). Every loop in these specifications is bounded:
-   the sub-structure walk by the area TOC size, text scans by 4096 bytes or the buffer, track
-   text by the area TOC size, sector processing by the number of audio sectors, and DST
-   decoding by the frame size.
+3. A reader MUST terminate on every input, and the work per structure is bounded by
+   constants of these specifications: the sub-structure walk takes at most 128 steps per area;
+   disc text takes at most 16 strings of at most 4096 bytes; area text at most 4 strings; track
+   text at most 255 tracks x 255 items x 4096 bytes per area (tracks may share one item list,
+   so this bound is not proportional to the area TOC size, but it is a constant); sector
+   processing is one pass over the area's existing audio sectors; and DST decoding of a frame is
+   proportional to `NB x Nch` plus the frame length.
 4. A reader MUST NOT crash or abort on any input. Errors are reported with the codes of 7.7.
 5. A failure in one area MUST NOT affect the other area, and a bad frame MUST NOT affect any
    other frame.
@@ -181,9 +183,10 @@ MAY report repeated occurrences separately.
 
 A reader MUST NOT report a code of 7.7.1 to 7.7.3 when its condition does not hold. Warnings
 outside these tables (for example about an unusual sample frequency code) MUST use other
-codes. The corpus therefore compares, for each case, the set of (code, slot, track) triples a
-reader reports from 7.7.1 to 7.7.3, other than `audio-sector-malformed`, for equality with the
-expected set.
+codes. The corpus therefore compares, for each image that is **not** rejected, the set of
+(code, slot, track) triples a reader reports from 7.7.2 and 7.7.3, other than
+`audio-sector-malformed`, for equality with the expected set. For a rejected image only the
+error code of 7.7.1 is compared.
 
 ### 7.7.4 Per-track outcomes
 
@@ -201,8 +204,10 @@ frames that were missing (filled with 0x69) and the DST frames that were invalid
 
 ## 7.8 Network input
 
-Data from a PS3 SACD Ripper server is bounded by specification 6, section 6.7. Sectors
-received over the network are then subject to every rule of this specification.
+Data from a PS3 SACD Ripper server is bounded by specification 6, section 6.7, and its
+failures have the codes of 6.7.1 (`network-connection-lost`, `network-protocol-error`,
+`network-disc-error`, `network-disc-too-large`, `network-disc-changed`). Sectors received over
+the network are then subject to every rule of this specification.
 
 ## 7.9 Real-disc envelope (informative)
 

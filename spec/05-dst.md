@@ -172,8 +172,10 @@ segment, and a ptable number to each ptable segment.
 | `table_mapping(FILTER)` | var | always | uses the filter segmentation |
 | `table_mapping(PTABLE)` | var | if `same_mapping` = 0 | uses the ptable segmentation |
 
-**table_mapping.** `T` is the number of distinct tables introduced so far. It starts at 1:
-segment 0 of channel 0 always has table 0, and its number is not sent. `nseg[c]` is the number
+**table_mapping.** `T` is the number of distinct tables of this kind introduced so far in this
+mapping. It starts at 1 at the beginning of **each** table_mapping (the filter mapping and the
+ptable mapping count separately): segment 0 of channel 0 always has table 0, and its number is
+not sent. `nseg[c]` is the number
 of segments of channel c in this segmentation.
 
 | Element | Bits | Condition / loop | Meaning |
@@ -186,8 +188,10 @@ of segments of channel c in this segmentation.
 
 Semantics and validity:
 
-1. The width of each `table_index` is computed from the current `T` before it is read:
-   width 1 for T = 1, 2 for T = 2 or 3, 3 for T = 4 to 7, 4 for T = 8 to 15.
+1. The width of each `table_index` is `bitlen(T)`, computed from the current `T` before it is
+   read: width 1 for T = 1, 2 for T = 2 or 3, 3 for T = 4 to 7, 4 for T = 8 to 15, 5 for T = 16
+   to 31, 6 for T = 32 to 63. (T can exceed `2 x Nch` while the mapping is read, up to one more
+   than the number of segments; the limit is checked only at the end, item 5.)
 2. A value `v < T` reuses table v. A value `v = T` introduces a new table, and T increases
    by 1. A value `v > T` makes the frame **invalid**.
 3. Tables are therefore numbered in order of first use, scanning channel 0's segments, then
