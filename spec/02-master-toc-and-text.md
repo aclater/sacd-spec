@@ -227,9 +227,11 @@ code of 0xFF selects set 7.
 1. **ISO 8859-1** maps each byte value `b` to the code point U+00`b` (0x00 to 0xFF). It
    never fails.
 2. **Sets 3 to 6** are defined by their mapping tables in [charsets/](charsets/). Table file
-   format: UTF-8 text; lines starting with `#` are comments; every other line is a byte sequence
-   as 2 or 4 upper-case hexadecimal digits, a tab, and one or more code points written `U+`
-   followed by 4 to 6 upper-case hexadecimal digits, separated by single spaces. The tables
+   format: UTF-8 text with LF line ends and no trailing spaces; lines starting with `#` are
+   comments; every other line is a byte sequence as 2 or 4 upper-case hexadecimal digits, a
+   tab, and one or more code points written `U+` followed by 4 to 6 upper-case hexadecimal
+   digits, separated by single spaces. A reader that loads the files SHOULD also accept CR LF
+   line ends. The tables
    are normative and complete: each lists every single byte and every two-byte sequence that is
    a character of the set, with the code point (or, for 25 entries of set 3, the two code points:
    a base and a combining mark) it decodes to. Published mappings of these standards disagree at

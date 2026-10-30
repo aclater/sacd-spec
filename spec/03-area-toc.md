@@ -23,7 +23,8 @@ The master TOC (specification 2, 2.3) has two **area slots**:
 3. The kind of an area (2-channel or multichannel) comes from its area TOC signature (3.3),
    not from its slot. A slot can therefore yield an area of the other kind, and both slots can
    yield areas of the same kind (for example when both point at the same TOC). Readers MUST
-   accept this and report each area with both its slot and its kind.
+   accept this and report each area with both its slot and its kind; the kind is identified by
+   the signature itself (`TWOCHTOC` or `MULCHTOC`).
 4. If no used slot yields an area, **reject the image** with `no-audio-areas`. This includes a
    disc where neither slot is used.
 5. **Order of checks and warnings.** For one slot, the checks run in this order: 3.2 (reading

@@ -77,6 +77,10 @@ written in more than one byte, such as 0x80 0x00) is a protocol error. This prot
 
 ### 6.3.3 Request
 
+A client MUST encode each request as the three fields in the order 1, 2, 3, each written
+explicitly (also when its value is 0), with minimal varints, followed by the terminating 0x00.
+For example, a read of 10 sectors at LSN 510 is the bytes 08 03 10 FE 03 18 0A 00.
+
 | Field number | Wire type | Name | Type | Meaning |
 |---|---|---|---|---|
 | 1 | 0 | request type | enumeration | see table below; always sent |
@@ -164,18 +168,19 @@ the bytes sent.
 
 ## 6.6 Session (informative)
 
-A typical client session; the requirements it relies on are those of 6.5 and 6.7:
+A typical client session. This section binds nothing by itself; the requirements it
+illustrates are those of 6.5 and 6.7:
 
 1. Connect to port 2002.
-2. Send open disc; require result 0.
-3. Send get disc size; require a result of 1 or more.
+2. Send open disc; result 0 is success (6.7.1).
+3. Send get disc size; a result of 1 or more is the disc size (6.7.1).
 4. Read one sector at LSN 0 (this sets the block size, 6.5 item 2), then, if the disc size
    allows it (6.7 item 10), the master TOC (LSN 510, 10 sectors).
 5. Read the area TOCs and audio sectors it needs, looping on short reads.
 6. Send close disc; the server closes the connection.
 
-A client that resumes after a dropped connection repeats steps 1 to 4 and MUST verify that
-the disc is the same (6.7 item 9) before continuing.
+A client that resumes after a dropped connection repeats steps 1 to 4 and verifies that the
+disc is the same, as 6.7 item 9 requires, before continuing.
 
 ## 6.7 Client requirements for hostile servers
 
@@ -191,7 +196,7 @@ A client MUST treat the server as hostile. In particular:
 | 6 | Bound the disc size the server reports. A larger size is an error; it would let a server make the client create an enormous file. | at most 2^22 sectors (8 GiB), just above a dual-layer disc |
 | 7 | Bound the time per response: a deadline that starts when the request has been sent and covers the whole response, not each receive, so that a server cannot trickle a response a byte at a time. On a missed deadline the client MUST close the connection; late bytes are never read. Connecting and sending a request MUST also be bounded in time; failing either is `network-connection-lost`. | 60 s RECOMMENDED for each |
 | 8 | Bound reconnection attempts. The count of attempts in a row restarts at 0 after any response that passes every check. | 3 in a row RECOMMENDED, with back-off |
-| 9 | After a reconnection, compare what the client already knows from earlier connections of the same transfer with what the new connection reports: the disc size, if it was obtained before, and the master TOC sectors (LSN 510 to 519), if they were received before. If any of these differs, the disc changed and the transfer (the sequence of reads the client was making) MUST fail with `network-disc-changed`. What was never obtained is not compared. | |
+| 9 | After a reconnection, before any other read, the client MUST on the new connection: open the disc, get the disc size, read one sector at LSN 0, and, if the disc size is at least 520 and the master TOC was **fully** received on an earlier connection of the same transfer, read LSN 510 to 519 again. It then compares the disc size, if it was obtained before, and the master TOC sectors, if they were fully received before (a partly received master TOC is not a baseline). If any of these differs, the disc changed and the transfer (the sequence of reads the client was making) MUST fail with `network-disc-changed`. What was never obtained is not compared. | |
 | 10 | Apply specifications 1 to 4 and 7 to the sectors received as to a plain-format image file of `N` sectors, `N` being the reported disc size, with these differences: no format detection is run (the format is plain), and the client MUST NOT request any sector at or past `N`. So if `N <= 510` the disc is rejected with `not-scarletbook`, and if `N < 520` with `master-toc-truncated`, without reading the master TOC (these outcomes can differ from those of a file of the same length, whose detection reads the bytes at LSN 510); every LSN taken from a TOC MUST be checked against `N` before it is requested, and a sector that would lie at or past `N` does not exist (1.3). | |
 
 ### 6.7.1 Error outcomes
@@ -199,10 +204,10 @@ A client MUST treat the server as hostile. In particular:
 Every failure of a client falls into one of these classes. A response is checked in this order,
 and the first failing check decides the class: (1) the message can be decoded (6.2, 6.3, items
 1 to 3), else `network-protocol-error`; (2) its type matches the request (item 4), else
-`network-protocol-error`; (3) its result is not negative where 6.4 defines a failure result,
-else `network-disc-error`, where a failure result is any result the `network-disc-error` row
-below names (for open, any result other than 0; for get disc size, any result below 1; for a
-read, any result below 0); (4) item 5 (for reads) and item 6 (for disc size).
+`network-protocol-error`; (3) its result is not a failure result, else `network-disc-error`, where a failure result is
+any result the `network-disc-error` row below names (for open, any result other than 0; for get disc size, any result below 1; for a
+read, any result below 0); (4) item 5 (for reads) and item 6 (for disc size); (5) during a
+reconnection, item 9 (`network-disc-changed`).
 
 The close disc request is a courtesy: a client SHOULD send it when it has received every sector
 it needs, but its response is not checked, and whether it arrives, is malformed or carries any
@@ -258,5 +263,5 @@ server that serves an image file for testing is advised to:
 | Sectors per read response | at most 512 |
 | Sector size on the wire | 2048 bytes |
 | Request fields | 3 |
-| Response fields | 2 or 3 |
+| Response fields | normally 2 or 3; a valid response may omit the result field or carry repeated or unknown fields, within the limits of 6.7 |
 | Largest legitimate data field | 512 x 2048 = 1 048 576 bytes |
