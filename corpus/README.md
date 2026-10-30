@@ -168,7 +168,8 @@ For each case:
    same set of items with equal strings (code point for code point). A reader's own TOC
    representation may hold more information; only the keys listed above are compared.
 4. Compare warnings: the set of (`code`, `area`, `track`) triples the reader reports from
-   specification 7, 7.7.2 and 7.7.3, excluding `audio-sector-malformed`, must equal the set in
+   specification 7, 7.7.2 and 7.7.3, excluding the optional codes `audio-sector-malformed`,
+   `master-toc-copies-differ` and `sample-frequency-unknown`, must equal the set in
    `expected.warnings`. Repeated warnings count once.
 5. The reader's areas must be those of `expected.audio` (by slot) and each area's tracks those
    listed (by number); an extra or missing area or track is a failure. For each track in
