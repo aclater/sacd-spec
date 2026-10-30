@@ -1,5 +1,10 @@
 # sacd-spec
 
+[![Licence: CC BY 4.0](https://img.shields.io/badge/licence-CC%20BY%204.0-lightgrey)](LICENSE)
+[![Corpus: CC0 1.0](https://img.shields.io/badge/corpus-CC0%201.0-lightgrey)](corpus/LICENSE)
+[![Docs links](https://github.com/aclater/sacd-spec/actions/workflows/docs-links.yml/badge.svg)](https://github.com/aclater/sacd-spec/actions/workflows/docs-links.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/aclater/sacd-spec/badge)](https://scorecard.dev/viewer/?uri=github.com/aclater/sacd-spec)
+
 An implementation-free specification of reading Super Audio CD (Scarletbook) disc images, and
 a conformance corpus to test readers against. It is written so that someone who has never seen
 any SACD code can write a correct reader from this repository alone.
@@ -20,6 +25,7 @@ any SACD code can write a correct reader from this repository alone.
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
+| [SECURITY.md](SECURITY.md) | reporting a gap that puts readers at risk |
 
 Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
 frames, which any area can contain (the audio sectors, not the area TOC, say whether a frame is
