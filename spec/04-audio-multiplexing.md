@@ -53,7 +53,42 @@ here are in [03-area-toc.md](03-area-toc.md).
    Informative: choosing `L` in any other way, for example from the track start LSNs
    (item 5), from timecodes found by searching, or by going back a fixed number of sectors,
    gives in general neither the frame under assembly nor a bound on `a_L`, because a single
-   earlier sector can change either (4.5 item 2).
+   earlier sector can change either (4.5 item 2). Item 8 describes reading without that
+   state.
+8. A reader MAY, when its caller asks for it, begin processing at a sector `L` with
+   `S0 < L <= S1'` without the state of item 7: with no frame under assembly and a next
+   acceptable frame number of `u`, producing only positions numbered `u` or more. This is
+   **provisional reading**. With `a_L` and the frame under assembly at `L` as in item 7, the
+   positions it produces are exactly those of this specification when both:
+
+   - (a) `a_L <= u`, and
+   - (b) the frame under assembly at `L` is none or has a frame number below `u`.
+
+   A reader MUST report the positions it produces this way as provisional, and MUST NOT
+   report them as the positions of this specification unless it has established (a) and (b),
+   for example by processing `S0` to `L - 1` afterwards. A reader that establishes (a) and (b)
+   SHOULD then report the provisional positions as confirmed, and one that establishes that
+   either fails SHOULD report them as possibly different. The reader chooses `L` as it likes
+   (for example from timecodes found by searching, from the track start LSNs, or in
+   proportion to the play time); the choice affects only how often (a) and (b) hold.
+
+   Informative:
+   - Under (a) and (b), the two readers differ only in the frame under assembly at `L`, until
+     the first start packet at or after `L` (or the end of the area). There, that frame is
+     delivered or discarded with a frame number below `u`, which cannot fill a position
+     numbered `u` or more. From there on, the frame under assembly is the same as for a reader
+     beginning under item 7, and 4.5 item 6 applies.
+   - (a) and (b) both hold whenever every frame that starts before `L` (4.4.3 item 3.3) has a
+     frame number below `u`. On an image whose frames start in increasing frame number order,
+     as on a well-formed disc, that is whenever `L` is at or before the sector where the
+     first frame numbered `u` or more starts.
+   - When (a) or (b) fails, the positions numbered `a*` or more are still exact, where `a*` is
+     the next acceptable frame number of a reader processing from `S0` just after it has
+     delivered or discarded the frame under assembly at `L`. Below `a*`, a provisional position
+     can differ from this specification's whether or not that position is missing: a frame
+     accepted before `L` is never seen by a provisional reader, and frames that this
+     specification discards can be accepted.
+   - No test of sectors at or after `L` can establish (a) or (b) (see the note to item 7).
 
 ## 4.3 Audio sector syntax
 
@@ -179,6 +214,9 @@ corpus does not require this warning.
    Item 2 applies to every sector it reports again, including the sectors it processes only to
    establish the frame under assembly. A count reported under item 3 SHOULD say which sectors
    it covers.
+5. A reader reading provisionally (4.2 item 8) reports the malformed sectors it processes from
+   `L`, and SHOULD say that its counts begin at `L`. Once it has established the state at `L`,
+   item 4 applies.
 
 ## 4.5 Delivery and the timeline
 
@@ -305,7 +343,7 @@ unchanged into a file format that carries them.
 6. A reader SHOULD report, for each range it produces, how many of its positions were
    missing and how many were invalid DST frames. These counts depend only on the range's
    positions (4.6), not on which sectors the reader processes or in how many passes (4.2
-   items 5 to 7).
+   items 5 to 7). Counts of provisional positions (4.2 item 8) are provisional too.
 
 ## 4.8 When no audio is produced
 

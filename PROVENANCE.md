@@ -119,7 +119,9 @@ formula from P-TOC.
   informative description of tracks with pauses in 4.7 item 4, which came from P-TOC.
 - 4.2 item 7, 4.4.5 item 4, 4.5 item 6 and the last sentence of 4.7.1 item 6 (beginning later
   in an area from established state) were written for this specification in answer to issues
-  #25 and #26, from specification 4 alone; no source was consulted.
+  #25 and #26, from specification 4 alone; no source was consulted. Provisional reading (4.2
+  item 8, 4.4.5 item 5, and the related sentences of 4.7.1 item 6, 7.1 item 3, the corpus
+  README and the README) was written in answer to issue #29 in the same way.
 - 4.6 (frame contents and fills): P-ENGINE, P-DST.
 - 4.7 (tracks as frame ranges; pauses informative): P-TOC (track ranges with and without
   pauses), P-ENGINE.
