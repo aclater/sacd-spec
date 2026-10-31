@@ -1,6 +1,6 @@
 # 0. Conventions used by every specification
 
-This document defines the terms, notation and outcome vocabulary that specifications 1 to 7
+This document defines the terms, notation and outcome vocabulary that specifications 1 to 8
 share. It is normative.
 
 ## 0.1 Requirement keywords
@@ -11,8 +11,8 @@ when, they appear in capitals.
 
 A **reader** is an implementation that reads disc images as these specifications describe.
 A reader that satisfies every MUST and MUST NOT in specifications 0 to 5 and 7 is
-**conforming**. Specification 6 (the PS3 network protocol) is an optional extension: a reader
-that implements it MUST follow it.
+**conforming**. Specifications 6 (the PS3 network protocol) and 8 (output containers) are
+optional extensions: a reader that implements one MUST follow it.
 
 ## 0.2 Numbers and bytes
 
@@ -144,5 +144,6 @@ specification uses a quantity from another, it names it in words.
 | 5 | [05-dst.md](05-dst.md) | the DST frame format and decoding process |
 | 6 | [06-ps3-protocol.md](06-ps3-protocol.md) | the PS3 SACD Ripper network protocol |
 | 7 | [07-validation-and-limits.md](07-validation-and-limits.md) | every limit, every check, every outcome, diagnostic codes |
+| 8 | [08-output-containers.md](08-output-containers.md) | writing DSF (with ID3v2.4) and DSDIFF files |
 
 The conformance corpus and its manifest are described in [../corpus/README.md](../corpus/README.md).
