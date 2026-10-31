@@ -219,7 +219,8 @@ read), `sacd_extract`, pysacd 0.2.1 and 0.2.2 (commit 8a179b5 and later, release
 and reuses round 1's reference figures. The `bench` output for tracks without audio, area selection by slot,
 `no-such-area` and track-number padding were decided for this document in answer to issue #9;
 no source was consulted. The names of the checksum and CPU-specific assets, and other builds
-of `bench` (Release binaries), were decided in answer to issue #14; no source was consulted.
+of `bench` (Release binaries), were decided in answer to issue #14; no source was consulted. Round 3 likewise measured only `bench` from scarletbook-rs v0.3.0's release assets (source not
+read), with round 1's reference figures.
 
 ## Open points
 
