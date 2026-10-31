@@ -170,6 +170,70 @@ that workload when the measurement is made.
 Each round of measurements is appended here, newest first, with the implementation version,
 the machines, the conditions and every figure, and the distance to each target.
 
+### Round 3: scarletbook 0.3.0 (2026-10-31)
+
+**Program:** `bench` from the scarletbook-rs v0.3.0 release assets: the generic and `znver5`
+builds, and the `x86-64-v3` build as a labelled side measurement; checksums verified, build
+provenance attestations verified.
+
+**Machine and conditions:** as round 1 (16-core machine, 32 hardware threads, the same five
+discs, local copies, output in a RAM file system). One virtual machine was running and busy
+during both passes: 1192 CPU seconds over the 1187-second first pass and 784 over the
+687-second second pass (about one core). The all-threads figures are means of 6 runs (two
+passes of 3, which agreed within 3 %); the one-core figures are means of 3, from the first
+pass; thread scaling at 1 thread: 2 runs. Only `bench` was measured; the figures of
+`sacd_extract` and reader P 0.2.2 are round 1's.
+
+**Correctness gate:** passed. All three builds produced the reference hashes for every track
+and channel of all 7 areas.
+
+**Extraction, all threads** (wall seconds, CPU seconds in brackets; round 2 figure in
+italics):
+
+| | `sacd_extract` | reader P 0.2.2 | `bench` generic | `bench` znver5 | `bench` x86-64-v3 |
+|---|---|---|---|---|---|
+| A | 3.67 | 1.00 | 1.23 (1.2) *1.19* | 1.05 (1.0) *1.03* | 1.11 (1.1) |
+| B, 2-channel | 7.83 | 2.87 | 3.15 (96) *3.11* | **2.50** (74) *2.58* | 2.64 (78) |
+| B, both areas | 35.02 | 11.75 | 12.38 (376) *14.27* | 12.42 (375) *11.30* | 12.04 (353) |
+| C, both areas | 18.43 | 6.96 | 7.26 (192) *8.63* | **6.68** (185) *6.60* | 6.84 (186) |
+| D | n/a | 2.35 | 2.79 (81) *2.60* | **2.21** (63) *2.22* | 2.31 (65) |
+| E | n/a | 4.23 | 5.08 (149) *4.83* | **4.16** (115) *4.02* | 4.08 (121) |
+
+**Decoding only** (`--sink null`, znver5): A 0.55 s, B 2-channel 2.75 s, B both areas 13.11 s,
+C both areas 6.85 s, D 2.22 s, E 4.22 s.
+
+**One core** (DST 2-channel, 50 min, 226 497 frames): `bench` 0.171 ms per frame (znver5),
+0.172 (x86-64-v3) and 0.211 (generic), against 0.215 / 0.239 for `bench` 0.2.0, 0.227 for
+reader P 0.2.2 and 0.680 for `sacd_extract`.
+
+**Thread scaling** (disc B, both areas, znver5, extraction; round 2 in italics):
+
+| Threads | 1 | 8 | 16 | 32 |
+|---|---|---|---|---|
+| `bench` wall | 166.5 s *183.2* | 22.8 s (7.3×) *24.3* | 13.3 s (12.5×) *13.4* | 13.5 s (12.4×) *11.6* |
+| `bench` CPU | 166 s | 182 s | 212 s | 376 s |
+
+**Peak memory:** `bench` 6 to 59 MB, flat with disc length.
+
+**Against the targets** (znver5 build; generic in brackets):
+
+| Target | Result |
+|---|---|
+| DST at least 1.5× `sacd_extract`, all threads | met: 2.8× to 3.1× (generic 2.5× to 2.8×) |
+| DST aim: as fast as the fastest baseline reader | partly met: 0.95× to 1.15× reader P 0.2.2; below on disc B both areas (0.95×) and its 6-channel area (generic 0.83× to 0.96×) |
+| DST single thread: frames per second of the fastest baseline reader | met: 0.171 against 0.227 ms per frame, 1.33× (generic 0.211: met) |
+| Plain DSD at least 2.5× `sacd_extract` | met: 3.5× (generic 3.0×) |
+| Thread scaling at least 12× at 16 threads | met: 12.5× |
+| Memory bounded independently of duration | met |
+
+**Changes since round 2:** one thread takes 9 % to 20 % less time, and the generic build gained
+the most (B both areas, all threads: 14.27 s to 12.38 s). With 32 threads on 16 cores (two
+per core), disc B both areas is slower than with 0.2.0 (13.5 s against 11.6 s, znver5), and
+32 threads are no faster than 16. Up to 16 threads, 0.3.0 is as fast as or faster than 0.2.0.
+The busy virtual machine took about one of the 16 cores in both passes, which costs at most a
+few per cent at full load; it does not account for the 32-thread difference. The x86-64-v3
+build is within 6 % of znver5 everywhere, faster on disc B both areas and disc E.
+
 ### Round 2: scarletbook 0.2.0 (2026-10-30)
 
 **Program:** `bench` from the scarletbook-rs v0.2.0 release assets, generic and `znver5`
