@@ -24,7 +24,11 @@ what crossed the wall.
 | P-DSTENC | pysacd `tests/dstenc.py`, `tests/native/dstenc.c` (test DST encoder), `tests/test_dst_full.py` (feature frames and invalid frames) | same | same | building the DST frames of the corpus |
 | P-HOSTILE | pysacd `tests/test_hostile_iso.py` | same | same | expected behaviour of hostile images |
 | P-CLAUDE | pysacd `CLAUDE.md` | same | same | constraints (clean room for DST, hostile input) |
-| DSF, DSDIFF | the public DSF and DSDIFF file format specifications | | public documents | permitted, but not consulted: no section depends on them |
+| DSF, DSDIFF | the public DSF and DSDIFF file format specifications | | public documents | not consulted for specifications 0 to 7; consulted for specification 8, see [DSF] and [DSDIFF] |
+| [DSF] | Sony Corporation, *DSF File Format Specification*, https://dsd-guide.com/sites/default/files/white-papers/DSFFileFormatSpec_E.pdf | version 1.01, accessed 2026-10-31 | public document | basis of specification 8, 8.2 |
+| [DSDIFF] | Philips, *Direct Stream Digital Interchange File Format, DSDIFF*, https://dsd-guide.com/sites/default/files/white-papers/DSDIFF_1.5_Spec.pdf | version 1.5, 2004-04-27, accessed 2026-10-31 | public document, all rights reserved; facts restated, no text or table copied | basis of specification 8, 8.4 |
+| [ID3] | M. Nilsson, *ID3 tag version 2.4.0* (main structure and native frames), https://github.com/id3/ID3v2.4 | 1 November 2000, accessed 2026-10-31 | free to copy and to derive explanations from, with a reference | basis of specification 8, 8.3 |
+| mutagen, FFmpeg | mutagen 1.48.1 (Python) and the `ffmpeg` command-line program, used as black boxes | as installed, 2026-10-31 | GPL-2.0-or-later; LGPL/GPL | checking that files written by the rules of specification 8 parse and decode; no source read |
 | Python | Python 3 standard library codec behaviour (`latin-1`, `shift_jisx0213`, `euc_kr`, `gb2312`, `big5`, `str.isspace`) | 3.14 | PSF | exact character-set behaviour of specification 2, 2.6 |
 
 Not consulted: the source of sacd-ripper or `sacd_extract`, FFmpeg's source tree itself (but
@@ -172,6 +176,29 @@ allocation bound of 7.1 item 2 were added in answer to issue #5.
 The work bound of 7.1 item 3 (one pass per track or range requested) and 4.2 item 6 were
 restated in answer to issue #18. The allowances for saved state in 7.1 items 2 and 3 were added
 in answer to issue #27; no source was consulted.
+
+### spec/08-output-containers.md
+
+Written in answer to issue #33 from [DSF], [DSDIFF] and [ID3] alone, with specifications 0 to 7
+for the inputs. The mapping of SACD layouts to DSF channel types and DSDIFF channel IDs and
+loudspeaker configurations comes from those documents; it agrees with the channel order of
+specification 3, 3.4.1, which came from P-SBCOMPAT. pysacd's own DSF, DSDIFF and ID3 output
+code was not consulted, and neither was any other program's writer. Interpretations are marked
+in the text: the alternation of DSF channel blocks (8.2.2), the two readings of the DSDIFF index
+offset (8.4.6.2), and the conflict between [DSF] and [ID3] about a tag footer (8.3.1). The CRC of
+8.4.6.1 is the long division [DSDIFF] defines, restated. The mapping of TOC items to ID3 frames
+(8.3.5), the date rule (8.3.8) and the marker list for a track list (8.4.10) were decided for
+this specification; the documents fix only the frames' and markers' meanings. Because
+specification 8 labels channels by it, the sentence in specification 3, 3.4.1 item 2 that
+called the channel order informative was amended. The CRC test vectors of 8.4.6.1 were computed
+from the definition, two independent ways. A cold read of this repository alone found 17
+points and a second pass 5 more, which were fixed before release.
+
+Checked by writing a stereo and a 5-channel DST track of the corpus image `dst-stereo-5ch-2054`
+by these rules: as DSF with 1 and 8 bits per sample (with an ID3v2.4 tag with a footer), as
+DSDIFF with plain DSD, and as DSDIFF with DST frames, CRCs, an index and markers. mutagen read
+every header field and every tag frame as written, and `ffmpeg` decoded all four files of each
+track to identical audio. The program that wrote them is not committed.
 
 ### corpus/
 

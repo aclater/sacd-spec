@@ -21,6 +21,7 @@ any SACD code can write a correct reader from this repository alone.
 | [spec/05-dst.md](spec/05-dst.md) | the complete DST frame syntax and decoding process |
 | [spec/06-ps3-protocol.md](spec/06-ps3-protocol.md) | the PS3 SACD Ripper network protocol (optional) |
 | [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
+| [spec/08-output-containers.md](spec/08-output-containers.md) | writing tracks and frame ranges as DSF (with ID3v2.4) and DSDIFF files (optional) |
 | [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
@@ -30,7 +31,7 @@ any SACD code can write a correct reader from this repository alone.
 Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
 frames, which any area can contain (the audio sectors, not the area TOC, say whether a frame is
 DST-coded), and 6 only for reading from a PS3. Specification 7 collects every check in
-one place.
+one place. Specification 8 is needed only to write DSF or DSDIFF files.
 
 ## The clean-room process
 
@@ -74,7 +75,8 @@ and deterministic: for every image that is not rejected, two conforming readers 
 same TOC, the same set of required warnings (the codes of specification 7 that are not marked
 optional) and the same audio; for a rejected image they produce the same error code. Not
 covered by that promise: a sector format chosen by the caller instead of detected
-(specification 1, 1.4); positions reported as provisional (specification 4, 4.2 item 8); optional (SHOULD or MAY) warnings, warnings under codes of the reader's
+(specification 1, 1.4); positions reported as provisional (specification 4, 4.2 item 8); the
+bytes of written files where specification 8 leaves a choice to the writer (8.6); optional (SHOULD or MAY) warnings, warnings under codes of the reader's
 own, and warnings emitted before a rejection; and, over the network, the cases specification 6
 declares unspecified, and the choice of network error code and retry policy, which it only
 recommends. Frame counts

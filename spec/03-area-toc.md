@@ -119,8 +119,9 @@ Sector 0 of `Z`:
    | 5 | 3 | 5-channel (3/2) | front left, front right, centre, surround left, surround right |
    | 6 | 4 | 5.1-channel | front left, front right, centre, low-frequency effects, surround left, surround right |
 
-   The channel order is informative. It is the order existing tools use when they label the
-   channels of extracted audio; these specifications do not otherwise depend on it.
+   It is the order existing tools use when they label the channels of extracted audio.
+   Decoding (specifications 4 and 5) does not depend on it; specification 8 does, when it
+   labels the channels of written files.
 3. Neither field changes how audio is decoded, apart from the channel count.
 
 ### 3.4.2 Frame format and sample rate
