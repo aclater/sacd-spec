@@ -126,7 +126,8 @@ formula from P-TOC.
   #25 and #26, from specification 4 alone; no source was consulted. Provisional reading (4.2
   item 8, 4.4.5 item 5, and the related sentences of 4.7.1 item 6, 7.1 item 3, the corpus
   README and the README) was written in answer to issue #29 in the same way, and 4.2 item 9,
-  locator samples (4.2 item 8, 7.1 item 2) in answer to issue #31.
+  locator samples (4.2 item 8, 7.1 item 2) in answer to issue #31, and the suspect mark of 4.2
+  item 8 in answer to issue #37.
 - 4.6 (frame contents and fills): P-ENGINE, P-DST.
 - 4.7 (tracks as frame ranges; pauses informative): P-TOC (track ranges with and without
   pauses), P-ENGINE.

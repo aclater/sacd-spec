@@ -75,6 +75,15 @@ here are in [03-area-toc.md](03-area-toc.md).
    and (b) hold. A locator sample only steers that choice and never makes a position exact, so
    it needs no check beyond ignoring a sample whose sector is outside `S0` to `S1'`.
 
+   A reader MAY also mark a provisional reading as **suspect** when it has reasons of its own
+   to expect (a) or (b) to fail, before any pass has settled them. The mark is informative:
+   a suspect reading is still provisional, is settled as confirmed or possibly different
+   exactly as any other, and the mark has no effect on that outcome. The reasons are the
+   reader's own; examples are frame numbers that do not increase between the sectors it read
+   while choosing `L`, and an area whose TOC places its audio past the end of the image or
+   over another area's TOC or audio sectors. A reader MAY also, for such an area or reading,
+   not read provisionally at all and produce the positions as items 2 to 7 do.
+
    Informative:
    - Under (a) and (b), the two readers differ only in the frame under assembly at `L`, until
      the first start packet at or after `L` (or the end of the area). There, that frame is
