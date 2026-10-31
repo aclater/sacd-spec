@@ -529,7 +529,9 @@ writer's choice; its `D` is the space they occupy (8.4.1 item 1):
 | artist | `DIAR` | u32 `k`, `k` text bytes, 0x00 if `k` is odd |
 | title | `DITI` | u32 `k`, `k` text bytes, 0x00 if `k` is odd |
 
-`EMID`, `DIAR` and `DITI` appear at most once each. Whether to write `DIIN`, `DIAR` and
+`EMID`, `DIAR` and `DITI` appear at most once each. A text length `k` of 0 is valid in
+`DIAR`, `DITI`, a comment and a marker; when a string is empty, or becomes empty under 8.4.9,
+writing the chunk or comment with `k = 0` or leaving it out is the writer's choice (8.6). Whether to write `DIIN`, `DIAR` and
 `DITI`, and which reported strings fill `DIAR` and `DITI` (for example the album or disc
 artist and title of 2.5.4), are the writer's choices (8.6).
 
@@ -591,6 +593,18 @@ is `[s_T + d_T, P)`.
    track start at `max(a, s_i)` and a track stop at `min(b, s_i + d_i)`, with times by 8.4.8.
    It is written only when `max(a, s_i) < min(b, s_i + d_i)`; otherwise (for example for the
    track with pause of a track of duration 0) the file has no markers.
+4. A file holding a frame range `[a, b)` with no source track has no markers, or, as the
+   writer chooses (8.6), the **clipped program** of the range: a program start at `a`; then,
+   for each track `i` in order with `max(a, s_i) < min(b, s_i + d_i)`, a track start at
+   `max(a, s_i)` and a track stop at `min(b, s_i + d_i)` when it is the last such track or
+   when the next such track starts later. The clipped program is written only when those
+   clipped tracks meet item 2's condition; for the play range `[0, P)` it is the program of
+   the main text.
+
+Informative: [DSDIFF] says the sound data before the program start and the post-roll are not
+part of the area. A disc made from a file of the play range therefore ends its area at
+`s_T + d_T`, not at `P`, when `s_T + d_T < P`. No marker list can keep `[s_T + d_T, P)` in the
+area without lengthening the last track.
 
 ### 8.4.11 Edited master
 
@@ -598,6 +612,9 @@ is `[s_T + d_T, P)`.
 field marks a file as one: a file is an edited master when all of the following hold. A writer
 that offers edited-master output MUST produce files that meet them all, and refuses an area
 that cannot.
+
+An edited master of this specification holds exactly the play range `[0, P)` of the area, with
+the markers of 8.4.10's main text. A writer refuses edited-master output for any other range.
 
 1. **Chunks present:** `FVER`; `PROP` with `FS  `, `CHNL`, `CMPR`, `ABSS` and `LSCO`; the
    sound data; `DIIN` with `EMID` and the markers. DST sound data has `FRTE` and the `DSTF`
@@ -609,8 +626,10 @@ that cannot.
 4. **Markers:** they represent one program (8.4.10). They are in ascending time order, and
    all times are distinct except that the program start may coincide with the first track
    start. Every marker channel is 0.
-5. **Tracks:** 1 to 255 tracks, each at least 75 frames (1 second) long; pauses of any length,
-   including 0. The tracks meet 8.4.10 item 2.
+5. **Tracks:** 1 to 255 tracks, each with a duration `d_i` (after specification 3, 3.9.2) of
+   at least 75 frames (1 second); pauses of any length, including 0. The tracks meet 8.4.10
+   item 2. A post-roll `[s_T + d_T, P)` of any length, including 0, is allowed (see the note
+   to 8.4.10).
 6. **Duration:** the program, from program start to the last track stop, is at most 255
    minutes, 59 seconds and 74 frames.
 7. **Index markers**, if any, lie inside a track, at most 254 per track. The TOC of
@@ -662,3 +681,5 @@ byte-identical output to another program needs to make each choice the same way.
 | 27 | Markers for tracks that are not in increasing order, overlap, or are empty | none, or approximate markers labelled as such | 8.4.10 |
 | 28 | Markers in a file with a source track | none, or a one-track program | 8.4.10 |
 | 29 | Source track of a frame-range file | none, or a track the writer names that overlaps the range | 8.1 |
+| 30 | Markers of a frame-range file without a source track | none, or the clipped program | 8.4.10 |
+| 31 | An empty `DIAR`, `DITI` or comment | written with `k = 0`, or left out | 8.4.8 |

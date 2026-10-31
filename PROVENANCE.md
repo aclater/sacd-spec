@@ -192,7 +192,9 @@ this specification; the documents fix only the frames' and markers' meanings. Be
 specification 8 labels channels by it, the sentence in specification 3, 3.4.1 item 2 that
 called the channel order informative was amended. The CRC test vectors of 8.4.6.1 were computed
 from the definition, two independent ways. A cold read of this repository alone found 17
-points and a second pass 5 more, which were fixed before release.
+points and a second pass 5 more, which were fixed before release. The edited-master range, the
+clipped program of 8.4.10 item 4, the post-roll note and the empty-text rule were added in
+answer to issue #35, from [DSDIFF] sections 3.7 and 4.
 
 Checked by writing a stereo and a 5-channel DST track of the corpus image `dst-stereo-5ch-2054`
 by these rules: as DSF with 1 and 8 bits per sample (with an ID3v2.4 tag with a footer), as
