@@ -20,7 +20,10 @@ prevails over the summary tables here. The section references say where each rul
    `6 x 4704` bytes for a decoded frame, plus per-track output proportional to the track's
    length (and the same for a frame range, specification 4, 4.7.1), which 7.5 bounds by 7 frames of at most `6 x 4704` bytes per existing audio sector
    (about 100 times the size of the area's audio sectors), the frames held between delivery
-   and output (specification 4, 4.5 item 5), and diagnostics: each warning is of bounded size,
+   and output (specification 4, 4.5 item 5), saved state for beginning later in an area
+   (specification 4, 4.2 item 7: a constant number of bytes per existing audio sector, plus at
+   most one frame under assembly of 65 536 bytes for each saved state that holds one, with the
+   number of such states a constant of the reader or chosen by the caller), and diagnostics: each warning is of bounded size,
    and their number is bounded by a constant per structure of these specifications plus at most
    one `audio-sector-malformed` per audio sector processed (specification 4, 4.4.5), which a
    reader MAY cap further.
@@ -32,7 +35,10 @@ prevails over the summary tables here. The section references say where each rul
    zero-skipping pass of at most `E` bytes per track; sector
    processing is at most one pass over the area's existing audio sectors (specification 4,
    4.2) for each track, frame range or stored frame list (specification 4, 4.6.1) the caller asks
-   for, and a reader that produces an
+   for, plus at most one further pass per area to establish saved state (specification 4, 4.2
+   item 7), made once however many reads then use it; a read that begins after `S0` (4.2
+   item 7), including the sectors it processes only to establish the frame under assembly,
+   counts as one pass; a reader that produces an
    area's tracks in increasing order of their start frames needs only one pass for all of them
    (specification 4, 4.5 item 4); and DST decoding of a frame is
    proportional to `NB x Nch` plus the frame length.

@@ -38,6 +38,22 @@ here are in [03-area-toc.md](03-area-toc.md).
 6. A reader MAY process the sectors of an area more than once, for example once per track.
    Every complete pass gives the same frames, because 4.4 and 4.5 depend only on the sectors
    and their order. Specification 7, 7.1 item 3 bounds the number of passes.
+7. A reader MAY begin processing at a sector `L` with `S0 < L <= S1' + 1`, instead of at `S0`,
+   if it begins with the frame under assembly (4.4.1) that processing `S0` to `L - 1` would
+   leave there. That frame under assembly depends only on `C` and the bytes of those sectors,
+   so a reader can establish it during an earlier pass of its own over them (item 6), or by
+   beginning at an earlier sector where it knows the frame under assembly to be none. Let
+   `a_L` be the next acceptable frame number (4.5) that processing `S0` to `L - 1` would leave.
+   From such a beginning, a reader produces only positions numbered `u` or more, for a `u`
+   that it knows to be at least `a_L`, and it begins with a next acceptable frame number of
+   its own choice that is at most `u`. It then produces exactly the frames this specification
+   defines for those positions (4.5 item 6). Positions numbered below `a_L` are never produced
+   from such a beginning. The stored frame list (4.6.1 item 2) is not produced this way.
+
+   Informative: choosing `L` in any other way, for example from the track start LSNs
+   (item 5), from timecodes found by searching, or by going back a fixed number of sectors,
+   gives in general neither the frame under assembly nor a bound on `a_L`, because a single
+   earlier sector can change either (4.5 item 2).
 
 ## 4.3 Audio sector syntax
 
@@ -158,6 +174,11 @@ corpus does not require this warning.
    the first `K` such warnings of an area in the order it processes sectors, for a constant
    `K` of its own (at least 1); it then SHOULD also report the number of malformed sectors it
    processed in that area, so that the omission is visible.
+4. A reader that begins at a sector after `S0` (4.2 item 7) need not report the malformed
+   sectors before that sector. It MAY report those that an earlier pass of its own found.
+   Item 2 applies to every sector it reports again, including the sectors it processes only to
+   establish the frame under assembly. A count reported under item 3 SHOULD say which sectors
+   it covers.
 
 ## 4.5 Delivery and the timeline
 
@@ -178,6 +199,13 @@ number. The reader keeps a **next acceptable frame number** `a`, starting at 0 f
    frame is at most 65 536 bytes before decoding and `C x 4704` bytes after, and only frames
    inside a track or frame range (4.7.1) that is still to be produced need to be kept. A reader
    that produces the stored frame list (4.6.1 item 2) need keep only the frame it is delivering.
+6. Informative: when processing begins at `S0`, `a` is 0 until the first frame is delivered
+   and afterwards one more than the largest frame number delivered so far. In general, a
+   delivered frame `t` is accepted exactly when `t` is at least the value of `a` at the
+   beginning of processing and greater than every frame number delivered before it. So two
+   readers that process the same sectors from the same frame under assembly, beginning with
+   next acceptable frame numbers that are both at most `u`, accept exactly the same frames
+   numbered `u` or more. 4.2 item 7 relies on this.
 
 ## 4.6 Frame contents
 
@@ -275,7 +303,9 @@ unchanged into a file format that carries them.
    may overlap; they are used as they are. Item 4 applies to each of them, so a track with
    duration 0 can still have a track with pause that produces audio.
 6. A reader SHOULD report, for each range it produces, how many of its positions were
-   missing and how many were invalid DST frames.
+   missing and how many were invalid DST frames. These counts depend only on the range's
+   positions (4.6), not on which sectors the reader processes or in how many passes (4.2
+   items 5 to 7).
 
 ## 4.8 When no audio is produced
 
@@ -295,7 +325,8 @@ make a reader produce hours of fill from a few sectors. The bound applies to the
 frame number, not to its length.
 
 Otherwise the track's audio is produced as 4.7 says, and the reader SHOULD report, per track,
-how many of its frames were missing and how many were invalid DST frames. Frame ranges
+how many of its frames were missing and how many were invalid DST frames, counted over the
+track's positions as in 4.7.1 item 6. Frame ranges
 (4.7.1) are checked in the same way (4.7.1 item 4).
 
 ## 4.9 Limits
