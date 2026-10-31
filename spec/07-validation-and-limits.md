@@ -23,7 +23,10 @@ prevails over the summary tables here. The section references say where each rul
    and output (specification 4, 4.5 item 5), saved state for beginning later in an area
    (specification 4, 4.2 item 7: a constant number of bytes per existing audio sector, plus at
    most one frame under assembly of 65 536 bytes for each saved state that holds one, with the
-   number of such states a constant of the reader or chosen by the caller), and diagnostics: each warning is of bounded size,
+   number of such states a constant of the reader or chosen by the caller), saved locator
+   samples (specification 4, 4.2 item 8: a constant number of bytes each, their number a
+   constant of the reader or chosen by the caller and checked against it when they are
+   loaded), and diagnostics: each warning is of bounded size,
    and their number is bounded by a constant per structure of these specifications plus at most
    one `audio-sector-malformed` per audio sector processed (specification 4, 4.4.5), which a
    reader MAY cap further.

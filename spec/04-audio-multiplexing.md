@@ -69,8 +69,11 @@ here are in [03-area-toc.md](03-area-toc.md).
    for example by processing `S0` to `L - 1` afterwards. A reader that establishes (a) and (b)
    SHOULD then report the provisional positions as confirmed, and one that establishes that
    either fails SHOULD report them as possibly different. The reader chooses `L` as it likes
-   (for example from timecodes found by searching, from the track start LSNs, or in
-   proportion to the play time); the choice affects only how often (a) and (b) hold.
+   (for example from timecodes found by searching, from the track start LSNs, in proportion
+   to the play time, or from **locator samples**: pairs of a sector and the frame number of
+   its first frame record, saved from an earlier read). The choice affects only how often (a)
+   and (b) hold. A locator sample only steers that choice and never makes a position exact, so
+   it needs no check beyond ignoring a sample whose sector is outside `S0` to `S1'`.
 
    Informative:
    - Under (a) and (b), the two readers differ only in the frame under assembly at `L`, until
@@ -89,6 +92,17 @@ here are in [03-area-toc.md](03-area-toc.md).
      accepted before `L` is never seen by a provisional reader, and frames that this
      specification discards can be accepted.
    - No test of sectors at or after `L` can establish (a) or (b) (see the note to item 7).
+9. What a pass over `S0` to `L - 1` establishes stays established for later readings,
+   including after the reader has saved it and loaded it again, for example in another
+   session. That covers the frame under assembly and `a_L` of item 7, and (a) and (b) of
+   item 8. It holds only for an image whose sectors `S0` to `L - 1` are the bytes that pass
+   processed. A reader MUST NOT rely on saved results for any other image. How it establishes
+   that the bytes are the same is its own choice, for example by keeping the results with the
+   image's identity and checks of its own; a check of sectors at or after `L` alone does not
+   establish it (see the note to item 7). Once (a) and (b) are established for a sector `L`
+   and a value `u_L`, they hold for every reading from `L` with `u >= u_L`, because both only
+   bound values at `L` by `u` from above; the reader MAY report such readings as confirmed
+   without processing `S0` to `L - 1` again.
 
 ## 4.3 Audio sector syntax
 
