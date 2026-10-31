@@ -117,6 +117,9 @@ formula from P-TOC.
   pauses) were written for this specification in answer to issues #16 and #17, from
   specifications 4 and 5 alone; no source was consulted. 4.7.1 item 5 makes exact the formerly
   informative description of tracks with pauses in 4.7 item 4, which came from P-TOC.
+- 4.2 item 7, 4.4.5 item 4, 4.5 item 6 and the last sentence of 4.7.1 item 6 (beginning later
+  in an area from established state) were written for this specification in answer to issues
+  #25 and #26, from specification 4 alone; no source was consulted.
 - 4.6 (frame contents and fills): P-ENGINE, P-DST.
 - 4.7 (tracks as frame ranges; pauses informative): P-TOC (track ranges with and without
   pauses), P-ENGINE.
@@ -164,7 +167,8 @@ Consolidated from specifications 1 to 6. Starting points: P-SEC ("Hostile images
 reports as free-text warnings. 7.9 (real-disc survey) from P-SEC. Diagnostics in the
 allocation bound of 7.1 item 2 were added in answer to issue #5.
 The work bound of 7.1 item 3 (one pass per track or range requested) and 4.2 item 6 were
-restated in answer to issue #18.
+restated in answer to issue #18. The allowances for saved state in 7.1 items 2 and 3 were added
+in answer to issue #27; no source was consulted.
 
 ### corpus/
 
