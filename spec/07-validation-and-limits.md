@@ -38,7 +38,9 @@ prevails over the summary tables here. The section references say where each rul
    for, plus at most one further pass per area to establish saved state (specification 4, 4.2
    item 7), made once however many reads then use it; a read that begins after `S0` (4.2
    item 7), including the sectors it processes only to establish the frame under assembly,
-   counts as one pass; a reader that produces an
+   counts as one pass; a provisional reading (4.2 item 8) MAY also read, to choose `L`, at most
+   a constant of the reader times `log2(n + 1)` sectors, where `n` is the number of the area's
+   existing audio sectors (4.8 item 3); a reader that produces an
    area's tracks in increasing order of their start frames needs only one pass for all of them
    (specification 4, 4.5 item 4); and DST decoding of a frame is
    proportional to `NB x Nch` plus the frame length.

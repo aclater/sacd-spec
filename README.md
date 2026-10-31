@@ -74,7 +74,7 @@ and deterministic: for every image that is not rejected, two conforming readers 
 same TOC, the same set of required warnings (the codes of specification 7 that are not marked
 optional) and the same audio; for a rejected image they produce the same error code. Not
 covered by that promise: a sector format chosen by the caller instead of detected
-(specification 1, 1.4); optional (SHOULD or MAY) warnings, warnings under codes of the reader's
+(specification 1, 1.4); positions reported as provisional (specification 4, 4.2 item 8); optional (SHOULD or MAY) warnings, warnings under codes of the reader's
 own, and warnings emitted before a rejection; and, over the network, the cases specification 6
 declares unspecified, and the choice of network error code and retry policy, which it only
 recommends. Frame counts
