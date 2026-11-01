@@ -597,7 +597,10 @@ writer's choice; its `D` is the space they occupy (8.4.1 item 1):
 `EMID`, `DIAR` and `DITI` appear at most once each. `DIIN` may hold any of these chunks without
 the others; for example `MARK`, `DIAR` and `DITI` without `EMID`. Only an edited master
 requires `EMID` (8.4.11 item 1), and whether to write it in another file is the writer's choice
-(8.6). A text length `k` of 0 is valid in
+(8.6). `DIIN` may also hold none of them, in a file that is not an edited master: no `EMID`, no
+markers, and no `DIAR` or `DITI`. [DSDIFF] makes every chunk inside `DIIN` optional and does not
+require it to hold one. Writing such a `DIIN` with `D = 0` (12 bytes) or leaving `DIIN` out is
+then the writer's choice (8.6). Both say the same: the file has no edited master information. A text length `k` of 0 is valid in
 `DIAR`, `DITI`, a comment and a marker; when a string is empty, or becomes empty under 8.4.9,
 writing the chunk or comment with `k = 0` or leaving it out is the writer's choice (8.6). Whether to write `DIIN`, `DIAR` and
 `DITI`, and which reported strings fill `DIAR` and `DITI` (for example the album or disc
@@ -757,6 +760,7 @@ byte-identical output to another program needs to make each choice the same way.
 | 31 | An empty `DIAR`, `DITI` or comment | written with `k = 0`, or left out | 8.4.8 |
 | 32 | What a DSF file holds | a range of positions, or a byte range of a chain | 8.2.7 |
 | 33 | Caller chunks in DSDIFF | none, or any number after the last local chunk | 8.4.2 |
+| 34 | A `DIIN` that would hold none of its chunks | written with `D = 0`, or left out | 8.4.8 |
 
 ## 8.7 Departures from [DSDIFF]
 
