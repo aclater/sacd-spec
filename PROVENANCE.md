@@ -203,6 +203,8 @@ of 8.7 were added in answer to issue #39, which restated a consumer's descriptio
 extractor's observable output; no program's code was read. The chain arithmetic of 8.2.7 was
 decided for this specification. The ID3v2.3 header check comes from [ID3v2.3] section 3.1, and
 the reasons D1 and D2 are departures, not choices, from [DSDIFF] sections 2.2 and 2.3.
+The empty `DIIN` of 8.4.8 (8.6 row 34) was added in answer to issue #41, from [DSDIFF]
+section 3.7, which lists every chunk inside `DIIN` as optional.
 
 Checked by writing a stereo and a 5-channel DST track of the corpus image `dst-stereo-5ch-2054`
 by these rules: as DSF with 1 and 8 bits per sample (with an ID3v2.4 tag with a footer), as
