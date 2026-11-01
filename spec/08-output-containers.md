@@ -1,12 +1,13 @@
 # 8. Output containers
 
 This specification defines how a reader writes the audio of a track, a frame range or a track
-with pause (specification 4, 4.7 and 4.7.1) as a DSF file, optionally with an ID3v2.4 tag, or
+with pause (specification 4, 4.7 and 4.7.1) as a DSF file, optionally with an ID3v2 tag, or
 as a DSDIFF file holding either plain DSD or DST frames, optionally as an edited master with
-markers and text. A reader MAY write any of these files. A reader that does MUST follow this
+markers and text. 8.7 lists, without allowing them, departures from [DSDIFF] that some
+existing programs make. A reader MAY write any of these files. A reader that does MUST follow this
 specification. Conventions are in [00-conventions.md](00-conventions.md).
 
-It restates, in this repository's own terms, the parts of three published documents that a
+It restates, in this repository's own terms, the parts of four published documents that a
 writer needs. Where those documents leave more than one valid output, this specification says
 **writer's choice** and lists the point in 8.6 instead of choosing. Where a document is silent
 or contradicts another one, the text says so.
@@ -16,6 +17,7 @@ or contradicts another one, the text says so.
 | [DSF] | Sony Corporation, *DSF File Format Specification* | version 1.01 (change history dated 11 November 2005) | https://dsd-guide.com/sites/default/files/white-papers/DSFFileFormatSpec_E.pdf |
 | [DSDIFF] | Philips, *Direct Stream Digital Interchange File Format, DSDIFF* | version 1.5, 2004-04-27 | https://dsd-guide.com/sites/default/files/white-papers/DSDIFF_1.5_Spec.pdf |
 | [ID3] | M. Nilsson, *ID3 tag version 2.4.0 - Main Structure* and *ID3 tag version 2.4.0 - Native Frames* | 1 November 2000 | https://raw.githubusercontent.com/id3/ID3v2.4/master/id3v2.40-structure.txt and id3v2.4.0-frames.txt in the same directory |
+| [ID3v2.3] | M. Nilsson, *ID3 tag version 2.3.0* (informal standard) | 3 February 1999 | https://id3.org/id3v2.3.0 (accessed 2026-11-01) |
 
 ## 8.1 What is written
 
@@ -24,7 +26,8 @@ or contradicts another one, the text says so.
    a track (4.7 item 1), a frame range (4.7.1 item 2) or a track with pause (4.7.1 item 5).
    The checks of specification 4, 4.8 (or 4.7.1 item 4) apply first. A range that they skip
    or refuse is not written, and the writer reports the same code. So `N >= 1` and the
-   area's channel count `C` is 1 to 6 in every file.
+   area's channel count `C` is 1 to 6 in every file. A DSF file MAY instead hold a byte
+   range (8.2.7), which is built from ranges of positions and checked the same way.
 3. The audio of a position is its content by specification 4, 4.6: `C x 4704` bytes in the
    interleaved layout of 0.6 item 2, with the fills of 0.6 item 3 for missing and invalid
    positions. DSF and DSDIFF with plain DSD hold this content. DSDIFF with DST holds the DST
@@ -70,26 +73,28 @@ a space where shown.
 | 52 | 4 | channel count | `C` |
 | 56 | 4 | sampling frequency | 2 822 400 |
 | 60 | 4 | bits per sample | 1 or 8 (8.2.3) |
-| 64 | 8 | sample count | `N x 37 632` |
+| 64 | 8 | sample count | `8 x S` (8.2.2) |
 | 72 | 4 | block size per channel | 4096 |
 | 76 | 4 | reserved | 0 |
 | 80 | 4 | signature | `data` |
 | 84 | 8 | size of the `data` chunk | `n + 12` |
 | 92 | `n` | sound data | 8.2.2 |
-| `92 + n` | `m` | metadata | an ID3v2.4 tag (8.3), or nothing (`m = 0`) |
+| `92 + n` | `m` | metadata | an ID3v2 tag (8.2.6), or nothing (`m = 0`) |
 
 1. Each chunk size counts the whole chunk, including its 12-byte signature and size. This is
    unlike DSDIFF (8.4.1).
 2. [DSF] describes the `fmt ` chunk's size as "usually 52 bytes". A writer writes 52; the
    table above has no other field.
-3. The sample count counts one channel's samples, which are bits: `N x 4704` DSD bytes of 8
-   samples each. The padding of 8.2.2 is not counted in it.
+3. The sample count counts one channel's samples, which are bits: `S` DSD bytes of 8
+   samples each (`N x 37 632` samples for a range of positions). The padding of 8.2.2 is not
+   counted in it.
 
 ### 8.2.2 Sound data
 
 Let `S = N x 4704` be the number of DSD bytes per channel. Channel `c`'s **stream** is its DSD
 bytes in time order: byte `k` (0 to `S - 1`) of the stream is byte `(k mod 4704) x C + c` of
-the content of position `a + floor(k / 4704)`.
+the content of position `a + floor(k / 4704)`. For a byte range, 8.2.7 item 2 gives `S` and
+the stream instead; everything below is the same.
 
 1. Each stream is cut into blocks of 4096 bytes. There are `B = ceil(S / 4096)` blocks per
    channel. Block `j` holds stream bytes `4096 j` to `min(4096 j + 4095, S - 1)`, followed,
@@ -147,10 +152,11 @@ sample is 1.
 
 ### 8.2.5 Sizes
 
-Every field of the file follows from `C`, `N` and the tag's size `m`:
+Every field of the file follows from `C`, `S` and the tag's size `m`, where `S = N x 4704`
+for a range of positions and `S = q - p` for a byte range (8.2.7):
 
-- `B = ceil(N x 4704 / 4096)` and `n = 4096 x B x C`;
-- sample count `= N x 37 632`;
+- `B = ceil(S / 4096)` and `n = 4096 x B x C`;
+- sample count `= 8 x S`;
 - `data` chunk size `= n + 12`;
 - metadata pointer `= 92 + n` when `m > 0`, and 0 when `m = 0`;
 - total file size `= 92 + n + m`.
@@ -160,11 +166,61 @@ audio, once it has built the tag.
 
 ### 8.2.6 Metadata
 
-1. The metadata region is optional (writer's choice, 8.6). When present, it is one ID3v2.4
-   tag (8.3) that starts right after the sound data and ends the file. [DSF] says only
-   "ID3v2"; this specification uses version 2.4.0.
+1. The metadata region is optional (writer's choice, 8.6). When present, it is one ID3v2 tag
+   that starts right after the sound data and ends the file. [DSF] says only "ID3v2", so
+   either of these is valid, as the writer chooses (8.6):
+   - an ID3v2.4 tag that the writer builds by 8.3; or
+   - an ID3v2.3 tag ([ID3v2.3]) whose bytes the caller supplies (item 4).
 2. When there is no tag, the metadata pointer is 0 and the file ends with the sound data.
-3. A tag has at least one frame ([ID3] section 4). A writer with nothing to tag writes no tag.
+3. An ID3v2.4 tag has at least one frame ([ID3] section 4). A writer with nothing to tag writes
+   no tag.
+4. **A caller-supplied ID3v2.3 tag** is a sequence of `m` bytes `T[0]` to `T[m - 1]`. The
+   writer writes it unchanged as the metadata region if all of the following hold, and
+   otherwise refuses to write the file, with an error code of its own:
+   - `m >= 10`, and `T[0..3]` is `ID3` (0x49 0x44 0x33);
+   - `T[3] = 0x03` and `T[4] = 0x00` (version 2.3.0);
+   - the low five bits of the flags byte `T[5]` are 0 ([ID3v2.3] section 3.1 defines only
+     bits 7, 6 and 5);
+   - `T[6]` to `T[9]` are each less than 0x80, and the 28-bit size they hold,
+     `T[6] x 2^21 + T[7] x 2^14 + T[8] x 2^7 + T[9]`, equals `m - 10`. [ID3v2.3] has no
+     footer, so the size covers everything after the 10-byte header.
+
+   This specification checks only the header. It does not define, check or change the
+   frames, and builds no ID3v2.3 tag of its own.
+
+### 8.2.7 Byte ranges
+
+A DSF file MAY hold a **byte range** of each channel instead of whole positions, as the writer
+chooses (8.6). This is DSF only. It allows "gapless" files whose boundaries fall inside a
+position, so that each file except the last holds whole 4096-byte blocks.
+
+1. The **byte timeline** numbers one channel's DSD bytes across the area: byte `k` of channel
+   `c` is byte `(k mod 4704) x C + c` of the content (4.6) of position `floor(k / 4704)`.
+   Frame `f` starts at byte `4704 f`.
+2. A file holding the byte range `[p, q)`, with `p < q`, has `S = q - p`, and byte `k` (0 to
+   `S - 1`) of channel `c`'s stream is byte `p + k` of channel `c`'s byte timeline. 8.2.2 to
+   8.2.5 then apply unchanged.
+3. Byte ranges are made from a **chain**: ranges of positions `[a_1, b_1)`, ...,
+   `[a_K, b_K)` with `K >= 1` and `b_i = a_{i+1}` for `i < K`, for example the tracks with
+   pause of consecutive tracks (4.7.1 item 5) when those meet end to end. Each `[a_i, b_i)`
+   is checked by 8.1 item 2. A writer that skips or refuses one splits the chain there: the
+   ranges before it and the ranges after it form separate chains. File `i` of the chain holds
+   the byte range `[p_i, p_{i+1})`, where:
+   - `p_1 = 4704 a_1`;
+   - `p_i = p_1 + 4096 x floor(4704 (a_i - a_1) / 4096)` for `2 <= i <= K`;
+   - `p_{K+1} = 4704 b_K`.
+4. So file `i`, for `i >= 2`, starts with the last `4704 a_i - p_i` bytes (0 to 4095) of
+   each channel of the range before it, and every file except the last ends at a block
+   boundary relative to `p_1`, leaving the rest of its range to the next file. Its stream is a
+   whole number of blocks with no pad: `S` is a multiple of 4096 and at least 4096, because
+   each range is at least one position (4704 bytes) long. The last file ends at `4704 b_K`,
+   with the pad of 8.2.2 when its `S` is not a multiple of 4096. Concatenating the files'
+   streams of a channel, in order, gives bytes `4704 a_1` to `4704 b_K - 1` of its byte
+   timeline, unchanged and with no pad between files.
+5. Every size of every file in the chain follows from `C`, the frame numbers `a_1` and the
+   `b_i`, and the tags (8.2.5), with no audio read.
+6. The source track (8.1 item 7) of file `i` is that of the range `[a_i, b_i)`, although the
+   file also holds bytes of its neighbours.
 
 ## 8.3 ID3v2.4 as DSF carries it
 
@@ -339,7 +395,7 @@ and day as 2. From the year, month and day of specification 2, 2.3.2:
    padded with spaces at the end: `DSD `, `C   `.
 4. **Text bytes** are bytes from 0x20 to 0x7E. All text in DSDIFF is text bytes (8.4.9).
 5. [DSDIFF] tells readers to skip chunks they do not recognise. A writer of this specification
-   writes only the chunks below.
+   writes only the chunks below and the caller chunks of 8.4.2 item 5.
 
 ### 8.4.2 File structure
 
@@ -355,13 +411,22 @@ The file is one `FRM8` chunk whose data is the ID `DSD ` followed by the **local
 | comments | `COMT` | no | not constrained |
 | edited master information | `DIIN` | no | not constrained |
 
-1. Each local chunk appears at most once.
+1. Each local chunk of the table appears at most once.
 2. The positions of `COMT`, `DIIN` and `DSTI` among the local chunks after `FVER` are the
    writer's choice (8.6).
 3. [DSDIFF] also defines a manufacturer specific chunk (`MANF`), which a writer of this
    specification does not write.
-4. The `FRM8` data size is 4 plus the space all local chunks occupy (8.4.1 item 1). It equals
-   the file size minus 12 and is always even.
+4. The `FRM8` data size is 4 plus the space all local chunks occupy (8.4.1 item 1), caller
+   chunks included. It equals the file size minus 12 and is always even.
+5. **Caller chunks.** After the last of the local chunks above, a writer MAY write any number
+   of **caller chunks** (8.6): chunks whose ID and data bytes its caller supplies, in the
+   caller's order. Each is written by 8.4.1 item 1: `D` is the number of data bytes, and a
+   pad byte 0x00 follows when `D` is odd, not counted in `D`. Its ID meets 8.4.1 item 3 and is
+   none of `FRM8`, `FVER`, `PROP`, `DSD `, `DST `, `DSTI`, `COMT`, `DIIN` and `MANF`. The same
+   ID may appear more than once. [DSDIFF] defines no such chunks and tells readers to skip
+   them (8.4.1 item 5); this specification does not define or check their data. For example,
+   a caller may supply an `ID3 ` chunk holding an ID3 tag, one in a track file, or one per
+   track in an edited master. Caller chunks are allowed in an edited master (8.4.11).
 
 `FVER` has `D = 4` and the value 0x01050000 (version 1.5.0.0).
 
@@ -529,11 +594,16 @@ writer's choice; its `D` is the space they occupy (8.4.1 item 1):
 | artist | `DIAR` | u32 `k`, `k` text bytes, 0x00 if `k` is odd |
 | title | `DITI` | u32 `k`, `k` text bytes, 0x00 if `k` is odd |
 
-`EMID`, `DIAR` and `DITI` appear at most once each. A text length `k` of 0 is valid in
+`EMID`, `DIAR` and `DITI` appear at most once each. `DIIN` may hold any of these chunks without
+the others; for example `MARK`, `DIAR` and `DITI` without `EMID`. Only an edited master
+requires `EMID` (8.4.11 item 1), and whether to write it in another file is the writer's choice
+(8.6). A text length `k` of 0 is valid in
 `DIAR`, `DITI`, a comment and a marker; when a string is empty, or becomes empty under 8.4.9,
 writing the chunk or comment with `k = 0` or leaving it out is the writer's choice (8.6). Whether to write `DIIN`, `DIAR` and
 `DITI`, and which reported strings fill `DIAR` and `DITI` (for example the album or disc
-artist and title of 2.5.4), are the writer's choices (8.6).
+artist and title of 2.5.4), are the writer's choices (8.6). In a file with a source track (8.1 item 7), these
+strings may also be that track's performer and title (specification 3, 3.5, item types 0x02
+and 0x01).
 
 **`COMT`** data is a u16 comment count followed by the comments, so its `D` is 2 plus the
 comments' sizes, each `14 + k + (k mod 2)`. Each comment is:
@@ -635,14 +705,16 @@ the markers of 8.4.10's main text. A writer refuses edited-master output for any
 7. **Index markers**, if any, lie inside a track, at most 254 per track. The TOC of
    specification 3 has no index points, so this specification writes none.
 
-[DSDIFF] recommends `DIAR`, `DITI` and `COMT`, and pause 1 and post-roll of 2 seconds. An
+Caller chunks (8.4.2 item 5) may follow the local chunks. [DSDIFF] recommends `DIAR`, `DITI`
+and `COMT`, and pause 1 and post-roll of 2 seconds. An
 area that does not meet items 2 to 6 can still be written as a DSDIFF file, but not as an
 edited master.
 
 ## 8.5 Not covered
 
-This specification does not define reading DSF or DSDIFF files, ID3 tags in DSDIFF files
-([DSDIFF] defines none), DSF files with DST data ([DSF] defines only DSD raw), sample rates
+This specification does not define reading DSF or DSDIFF files, the content of ID3v2.3 tags
+(8.2.6 item 4) or of caller chunks (8.4.2 item 5), ID3 tags in DSDIFF files ([DSDIFF] defines
+none), DSF files with DST data ([DSF] defines only DSD raw), sample rates
 other than 2 822 400 Hz, `MANF` chunks, or artwork and other ID3 frames not listed in 8.3.5.
 
 ## 8.6 Writer's choices
@@ -654,7 +726,7 @@ byte-identical output to another program needs to make each choice the same way.
 |---|---|---|---|
 | 1 | DSF bits per sample | 1 (bits reversed) or 8 (unchanged) | 8.2.3 |
 | 2 | DSF channel type for an unspecified layout | a type with count `C` from 8.2.4, or refuse with an error code of the writer's own | 8.2.4 |
-| 3 | DSF tag | none, or an ID3v2.4 tag | 8.2.6 |
+| 3 | DSF tag | none, an ID3v2.4 tag by 8.3, or a caller-supplied ID3v2.3 tag | 8.2.6 |
 | 4 | ID3 footer | footer and no padding (as [ID3] 3.4 requires for a tag after the audio), or no footer | 8.3.1 |
 | 5 | ID3 padding, without a footer | none, or any number of 0x00 bytes | 8.3.1 |
 | 6 | ID3 frame order | any | 8.3.3 |
@@ -675,7 +747,7 @@ byte-identical output to another program needs to make each choice the same way.
 | 21 | `DSTI` offset | position of the `DSTF` chunk, or of its data (12 bytes later) | 8.4.6.2 |
 | 22 | Whether `D` of `MARK`, `DIAR` and `DITI` counts the text's pad byte | counted or not | 8.4.7 |
 | 23 | Marker text and track flags | any; track flags 0 unless the writer has a mapping | 8.4.7 |
-| 24 | `EMID` content; whether to write `DIIN`, `DIAR` and `DITI`, and their strings | any text bytes; any reported strings | 8.4.8 |
+| 24 | Whether to write `EMID` (required in an edited master) and its content; whether to write `DIIN`, `DIAR` and `DITI`, and their strings | any text bytes; any reported strings, such as the album or disc artist and title, or the source track's performer and title | 8.4.8 |
 | 25 | Comments: whether, time stamps, types, references, text | any valid values | 8.4.8 |
 | 26 | Code points outside U+0020 to U+007E in DSDIFF text | replaced, transliterated or removed | 8.4.9 |
 | 27 | Markers for tracks that are not in increasing order, overlap, or are empty | none, or approximate markers labelled as such | 8.4.10 |
@@ -683,3 +755,31 @@ byte-identical output to another program needs to make each choice the same way.
 | 29 | Source track of a frame-range file | none, or a track the writer names that overlaps the range | 8.1 |
 | 30 | Markers of a frame-range file without a source track | none, or the clipped program | 8.4.10 |
 | 31 | An empty `DIAR`, `DITI` or comment | written with `k = 0`, or left out | 8.4.8 |
+| 32 | What a DSF file holds | a range of positions, or a byte range of a chain | 8.2.7 |
+| 33 | Caller chunks in DSDIFF | none, or any number after the last local chunk | 8.4.2 |
+
+## 8.7 Departures from [DSDIFF]
+
+Some existing programs write DSDIFF files that differ from [DSDIFF] in the ways below. These are
+not writer's choices: a file with a departure does not conform to [DSDIFF] or to this
+specification. They are defined here, byte for byte, so that a writer asked to reproduce such
+files does so knowingly and the same way as others.
+
+A writer MUST NOT make a departure unless its caller asks for that departure by its number.
+A writer that offers one says, where it documents the option, that the file it writes with it
+is not a conforming DSDIFF file. Everything not named in a departure stays as specified.
+
+| No. | Departure | What changes |
+|---|---|---|
+| D1 | `CMPR` size counts the pad byte | 8.4.3: with plain DSD, `CMPR` is written with `D = 20` instead of 19. The pad byte 0x00 after the name is still written and is now counted, so the chunk occupies the same 32 bytes and no other size changes. With DST, `D` is 16 and even, so nothing changes. |
+| D2 | DSDIFF text as ISO 8859-1 | 8.4.9: in `DIAR`, `DITI`, marker text and comment text, a code point from U+0020 to U+007E or from U+00A0 to U+00FF is written as the one byte of the same value, and every other code point is removed. Text lengths `k` count the bytes written. `EMID` and IDs are unchanged. |
+
+1. **Why D1 is not a choice.** [DSDIFF] section 2.3 says the pad byte is not included in a
+   chunk's data size, and the `CMPR` structure has no padding of its own. `DIAR`, `DITI` and
+   comments do: their text "must be padded" inside the structure, which is why their `D` is a
+   choice (8.4.7 item 6) and `CMPR`'s is not. A reader that follows [DSDIFF] still finds the
+   compression ID, count and name where they belong.
+2. **Why D2 is not a choice.** [DSDIFF] section 2.2 defines a text byte as a byte from 0x20 to
+   0x7E, and every text field above is made of text bytes. [DSDIFF] names no other
+   character set. A reader that follows [DSDIFF] may show bytes 0xA0 to 0xFF otherwise, or
+   reject them.

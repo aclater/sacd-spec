@@ -144,6 +144,6 @@ specification uses a quantity from another, it names it in words.
 | 5 | [05-dst.md](05-dst.md) | the DST frame format and decoding process |
 | 6 | [06-ps3-protocol.md](06-ps3-protocol.md) | the PS3 SACD Ripper network protocol |
 | 7 | [07-validation-and-limits.md](07-validation-and-limits.md) | every limit, every check, every outcome, diagnostic codes |
-| 8 | [08-output-containers.md](08-output-containers.md) | writing DSF (with ID3v2.4) and DSDIFF files |
+| 8 | [08-output-containers.md](08-output-containers.md) | writing DSF (with ID3v2 tags) and DSDIFF files |
 
 The conformance corpus and its manifest are described in [../corpus/README.md](../corpus/README.md).

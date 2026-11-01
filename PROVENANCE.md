@@ -28,6 +28,7 @@ what crossed the wall.
 | [DSF] | Sony Corporation, *DSF File Format Specification*, https://dsd-guide.com/sites/default/files/white-papers/DSFFileFormatSpec_E.pdf | version 1.01, accessed 2026-10-31 | public document | basis of specification 8, 8.2 |
 | [DSDIFF] | Philips, *Direct Stream Digital Interchange File Format, DSDIFF*, https://dsd-guide.com/sites/default/files/white-papers/DSDIFF_1.5_Spec.pdf | version 1.5, 2004-04-27, accessed 2026-10-31 | public document, all rights reserved; facts restated, no text or table copied | basis of specification 8, 8.4 |
 | [ID3] | M. Nilsson, *ID3 tag version 2.4.0* (main structure and native frames), https://github.com/id3/ID3v2.4 | 1 November 2000, accessed 2026-10-31 | free to copy and to derive explanations from, with a reference | basis of specification 8, 8.3 |
+| [ID3v2.3] | M. Nilsson, *ID3 tag version 2.3.0* (informal standard), https://id3.org/id3v2.3.0 | 3 February 1999, accessed 2026-11-01 | public document; header layout restated, no text copied | the header check of specification 8, 8.2.6 item 4 |
 | mutagen, FFmpeg | mutagen 1.48.1 (Python) and the `ffmpeg` command-line program, used as black boxes | as installed, 2026-10-31 | GPL-2.0-or-later; LGPL/GPL | checking that files written by the rules of specification 8 parse and decode; no source read |
 | Python | Python 3 standard library codec behaviour (`latin-1`, `shift_jisx0213`, `euc_kr`, `gb2312`, `big5`, `str.isspace`) | 3.14 | PSF | exact character-set behaviour of specification 2, 2.6 |
 
@@ -196,6 +197,12 @@ from the definition, two independent ways. A cold read of this repository alone 
 points and a second pass 5 more, which were fixed before release. The edited-master range, the
 clipped program of 8.4.10 item 4, the post-roll note and the empty-text rule were added in
 answer to issue #35, from [DSDIFF] sections 3.7 and 4.
+The byte ranges and chains of 8.2.7, the caller-supplied ID3v2.3 tag (8.2.6 item 4), caller
+chunks (8.4.2 item 5), the `EMID` and source-track clarifications of 8.4.8, and the departures
+of 8.7 were added in answer to issue #39, which restated a consumer's description of another
+extractor's observable output; no program's code was read. The chain arithmetic of 8.2.7 was
+decided for this specification. The ID3v2.3 header check comes from [ID3v2.3] section 3.1, and
+the reasons D1 and D2 are departures, not choices, from [DSDIFF] sections 2.2 and 2.3.
 
 Checked by writing a stereo and a 5-channel DST track of the corpus image `dst-stereo-5ch-2054`
 by these rules: as DSF with 1 and 8 bits per sample (with an ID3v2.4 tag with a footer), as
