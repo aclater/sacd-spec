@@ -26,6 +26,7 @@ any SACD code can write a correct reader from this repository alone.
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | how issues are planned, labelled and claimed, and how changes are made |
 | [SECURITY.md](SECURITY.md) | reporting a gap that puts readers at risk |
 
 Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
