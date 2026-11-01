@@ -21,7 +21,7 @@ any SACD code can write a correct reader from this repository alone.
 | [spec/05-dst.md](spec/05-dst.md) | the complete DST frame syntax and decoding process |
 | [spec/06-ps3-protocol.md](spec/06-ps3-protocol.md) | the PS3 SACD Ripper network protocol (optional) |
 | [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
-| [spec/08-output-containers.md](spec/08-output-containers.md) | writing tracks and frame ranges as DSF (with ID3v2.4) and DSDIFF files (optional) |
+| [spec/08-output-containers.md](spec/08-output-containers.md) | writing tracks and frame ranges as DSF (with ID3v2 tags, optionally gapless) and DSDIFF files (optional) |
 | [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
 | [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
 | [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
