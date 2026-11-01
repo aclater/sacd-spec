@@ -205,6 +205,10 @@ decided for this specification. The ID3v2.3 header check comes from [ID3v2.3] se
 the reasons D1 and D2 are departures, not choices, from [DSDIFF] sections 2.2 and 2.3.
 The empty `DIIN` of 8.4.8 (8.6 row 34) was added in answer to issue #41, from [DSDIFF]
 section 3.7, which lists every chunk inside `DIIN` as optional.
+A cold read of the text added for issues #39 and #41 found 11 points, fixed afterwards: the
+`ID3` byte indices, the chain as the caller's choice and its checks before writing, refusal of
+bad caller-chunk IDs, the 3.8 reference, conformance of a writer making a departure, and D2's
+relation to 8.6 rows 26 and 31.
 
 Checked by writing a stereo and a 5-channel DST track of the corpus image `dst-stereo-5ch-2054`
 by these rules: as DSF with 1 and 8 bits per sample (with an ID3v2.4 tag with a footer), as
