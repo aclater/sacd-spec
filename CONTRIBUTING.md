@@ -36,7 +36,7 @@ labels (`bug`, `enhancement`, `documentation`, `question`, ...) stay as they are
 | `P3` | nice to have |
 | `status: in progress` | claimed and being worked on |
 | `status: in review` | a pull request is open |
-| `status: fixed on main` | the answer is merged; the owner closes the issue once an implementation has adopted that commit and the result has been checked |
+| `status: fixed on main` | the answer is merged but the issue is still open, for example while a follow-up question is settled; most issues close when their pull request merges instead |
 | `status: needs decision` | waiting on the owner |
 | `tracking` | an umbrella or design issue that tracks other work |
 | `model: opus` | hard work: design, cross-chapter changes, problems nobody can yet explain |
@@ -50,7 +50,11 @@ Before starting on an issue, an agent checks that nobody has claimed it. Then:
 2. If it stops without a pull request, it comments that it is releasing the issue and removes
    that label.
 3. When its pull request opens, it changes the label to `status: in review`. The pull request
-   says `Part of #N`. Issues are closed by the owner, not by a merge.
+   says `Closes #N` when it fully answers the issue, else `Part of #N`.
 4. Nobody starts an issue that someone else has claimed; ask on the issue instead.
 
-When the pull request merges, the label becomes `status: fixed on main`.
+The specification has no releases: implementations read `main`, so a merged answer has
+shipped. An issue therefore closes when the pull request that fully answers it merges. If
+an implementation later finds a problem with that answer, reopen the issue, or open a new
+one that links to it. An issue that is only partly answered gets `status: fixed on main`
+until the rest is merged.
