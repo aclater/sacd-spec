@@ -9,6 +9,23 @@ An implementation-free specification of reading Super Audio CD (Scarletbook) dis
 a conformance corpus to test readers against. It is written so that someone who has never seen
 any SACD code can write a correct reader from this repository alone.
 
+## Quick start
+
+You need git and about 50 MB of disk space; the corpus check uses Python 3.
+
+1. Get the specifications and the corpus: `git clone https://github.com/aclater/sacd-spec.git`,
+   then `cd sacd-spec`.
+2. Read [specification 0](spec/00-conventions.md), then 1 to 4 in order: enough to read a
+   disc's TOC and its plain DSD audio. Specification 5 is needed to decode DST frames, which any
+   area can contain (the audio sectors, not the area TOC, say whether a frame is DST-coded), and
+   6 only for reading from a PS3. Specification 7 collects every check in one place.
+   Specification 8 is needed only to write DSF or DSDIFF files.
+3. Look at what a reader must produce for each test image:
+   `python3 -m json.tool corpus/manifest.json | less`. Each case names its image in `corpus/images/` and gives the
+   expected TOC, warnings and audio hashes, or the error that rejects the image.
+4. Run your reader on the images and compare its results with the manifest, as
+   [corpus/README.md](corpus/README.md) describes.
+
 ## Contents
 
 | | |
@@ -28,11 +45,6 @@ any SACD code can write a correct reader from this repository alone.
 | [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | how issues are planned, labelled and claimed, and how changes are made |
 | [SECURITY.md](SECURITY.md) | reporting a gap that puts readers at risk |
-
-Start with specification 0, then 1 to 4 in order. Specification 5 is needed to decode DST
-frames, which any area can contain (the audio sectors, not the area TOC, say whether a frame is
-DST-coded), and 6 only for reading from a PS3. Specification 7 collects every check in
-one place. Specification 8 is needed only to write DSF or DSDIFF files.
 
 ## The clean-room process
 
