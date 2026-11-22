@@ -215,16 +215,19 @@ position, so that each file except the last holds whole 4096-byte blocks.
    it form separate chains, each by this item. File `i` of the chain holds the byte range
    `[p_i, p_{i+1})`, where:
    - `p_1 = 4704 a_1`;
-   - `p_i = p_1 + 4096 x floor(4704 (a_i - a_1) / 4096)` for `2 <= i <= K`;
+   - `p_i = p_1 + 4096 x floor((4704 (a_i - a_1) - 1) / 4096)` for `2 <= i <= K`;
    - `p_{K+1} = 4704 b_K`.
-4. So file `i`, for `i >= 2`, starts with the last `4704 a_i - p_i` bytes (0 to 4095) of
+4. So file `i`, for `i >= 2`, starts with the last `4704 a_i - p_i` bytes (1 to 4096) of
    each channel of the range before it, and every file except the last ends at a block
-   boundary relative to `p_1`, leaving the rest of its range to the next file. Its stream is a
-   whole number of blocks with no pad: `S` is a multiple of 4096 and at least 4096, because
-   each range is at least one position (4704 bytes) long. The last file ends at `4704 b_K`,
-   with the pad of 8.2.2 when its `S` is not a multiple of 4096. Concatenating the files'
-   streams of a channel, in order, gives bytes `4704 a_1` to `4704 b_K - 1` of its byte
-   timeline, unchanged and with no pad between files.
+   boundary relative to `p_1`, leaving the rest of its range to the next file. A file whose
+   range would end exactly on such a boundary ends one block earlier and carries that whole
+   block into the next file; because `p_i` counts from `p_1`, the carry passes on through
+   every file that would end on a boundary. The last file is never shortened. Its stream is
+   a whole number of blocks with no pad: `S` is a multiple of 4096 and at least 4096,
+   because each range is at least one position (4704 bytes) long. The last file ends at
+   `4704 b_K`, with the pad of 8.2.2 when its `S` is not a multiple of 4096. Concatenating
+   the files' streams of a channel, in order, gives bytes `4704 a_1` to `4704 b_K - 1` of
+   its byte timeline, unchanged and with no pad between files.
 5. Every size of every file in the chain follows from `C`, the frame numbers `a_1` and the
    `b_i`, and the tags (8.2.5), with no audio read.
 6. The source track (8.1 item 7) of file `i` is that of the range `[a_i, b_i)`, although the
