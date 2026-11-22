@@ -201,7 +201,14 @@ The byte ranges and chains of 8.2.7, the caller-supplied ID3v2.3 tag (8.2.6 item
 chunks (8.4.2 item 5), the `EMID` and source-track clarifications of 8.4.8, and the departures
 of 8.7 were added in answer to issue #39, which restated a consumer's description of another
 extractor's observable output; no program's code was read. The chain arithmetic of 8.2.7 was
-decided for this specification. The ID3v2.3 header check comes from [ID3v2.3] section 3.1, and
+decided for this specification. Its item 3 was amended on 2026-11-22, in answer to
+scarletbook-rs issue #359: a consumer measured, as a black box, the files another extractor
+writes for chains of generated discs, and found that a file ending exactly on a block
+boundary ends one block earlier and carries that block into the next file. The amended
+formula reproduces every measured boundary between files; no program's code was read. The
+measured case of a chain that stops before the area's end, where that extractor drops the
+block, was not adopted: the last file of a chain is never shortened, so no audio is lost.
+The ID3v2.3 header check comes from [ID3v2.3] section 3.1, and
 the reasons D1 and D2 are departures, not choices, from [DSDIFF] sections 2.2 and 2.3.
 The empty `DIIN` of 8.4.8 (8.6 row 34) was added in answer to issue #41, from [DSDIFF]
 section 3.7, which lists every chunk inside `DIIN` as optional.
