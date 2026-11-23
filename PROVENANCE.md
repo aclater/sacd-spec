@@ -1,3 +1,5 @@
+[sacd-spec](README.md) › Provenance
+
 # Provenance
 
 This file records, for each part of this repository, which sources were consulted to write it.
@@ -348,3 +350,9 @@ contain nothing about the format and consulted no SACD source.
 
 Specifications 5 and 6 are rewrites of documentation in pysacd, whose repository is licensed
 GPL-2.0-or-later. They are published here under CC BY 4.0 by the owner of both repositories.
+
+## See also
+
+- [README: the clean-room process](README.md#the-clean-room-process)
+- [Contributing](CONTRIBUTING.md)
+- [Conformance corpus](corpus/README.md)

@@ -1,3 +1,5 @@
+[sacd-spec](README.md) › Contributing
+
 # Contributing
 
 This repository is the specification side of a clean room (see the README). Its content
@@ -18,7 +20,7 @@ Milestones therefore name what an answer is needed for:
 
 | Milestone | Meaning |
 |---|---|
-| `1.0` | needed before scarletbook-rs 1.0 freezes its interface |
+| `1.0` | needed before scarletbook-rs 1.0 froze its interface (1.0.0 was released on 2026-11-23) |
 | `Later` | not planned for a particular release |
 
 Every open issue has one of them, except umbrella and design issues, which have none and carry
@@ -58,3 +60,9 @@ shipped. An issue therefore closes when the pull request that fully answers it m
 an implementation later finds a problem with that answer, reopen the issue, or open a new
 one that links to it. An issue that is only partly answered gets `status: fixed on main`
 until the rest is merged.
+
+## See also
+
+- [README: the clean-room process](README.md#the-clean-room-process)
+- [Provenance](PROVENANCE.md)
+- [Security policy](SECURITY.md)

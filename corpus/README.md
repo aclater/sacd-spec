@@ -1,3 +1,5 @@
+[sacd-spec](../README.md) › Conformance corpus
+
 # Conformance corpus
 
 This directory holds synthetic SACD disc images and, in `manifest.json`, what a conforming
@@ -267,3 +269,10 @@ authority for them:
 
 About 186 MB (177 MiB) uncompressed, 136 files of 1.0 to 2.0 MB. Most of each image is the 510 empty
 sectors before the master TOC, which compress well, so the repository stays far smaller.
+
+## See also
+
+- [Conventions (specification 0)](../spec/00-conventions.md)
+- [Validation and limits (specification 7)](../spec/07-validation-and-limits.md)
+- [Benchmarks](../benchmarks/README.md)
+- [Provenance](../PROVENANCE.md#corpus)
