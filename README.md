@@ -9,6 +9,23 @@ An implementation-free specification of reading Super Audio CD (Scarletbook) dis
 a conformance corpus to test readers against. It is written so that someone who has never seen
 any SACD code can write a correct reader from this repository alone.
 
+## Contents
+
+| Part | What it covers |
+|---|---|
+| [spec/00-conventions.md](spec/00-conventions.md) | terms, notation, byte and bit order, outcome vocabulary |
+| [spec/01-disc-image-layout.md](spec/01-disc-image-layout.md) | 2048, 2054 and 2064-byte sector formats, detection, LSN addressing, where the TOCs are |
+| [spec/02-master-toc-and-text.md](spec/02-master-toc-and-text.md) | the master TOC, album set, catalogue numbers, genres, date, locales, text channels, character sets |
+| [spec/03-area-toc.md](spec/03-area-toc.md) | 2-channel and multichannel area TOCs, TOC-1 and TOC-2, tracks, timecodes, ISRCs, track text |
+| [spec/04-audio-multiplexing.md](spec/04-audio-multiplexing.md) | audio sectors, packets, frame reassembly, frames on the timeline, tracks |
+| [spec/05-dst.md](spec/05-dst.md) | the complete DST frame syntax and decoding process |
+| [spec/06-ps3-protocol.md](spec/06-ps3-protocol.md) | the PS3 SACD Ripper network protocol (optional) |
+| [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
+| [spec/08-output-containers.md](spec/08-output-containers.md) | writing tracks and frame ranges as DSF (with ID3v2 tags, optionally gapless) and DSDIFF files (optional) |
+| [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
+| [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
+| [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
+
 ## Quick start
 
 You need git and about 50 MB of disk space; the corpus check uses Python 3.
@@ -26,25 +43,15 @@ You need git and about 50 MB of disk space; the corpus check uses Python 3.
 4. Run your reader on the images and compare its results with the manifest, as
    [corpus/README.md](corpus/README.md) describes.
 
-## Contents
+## Documentation
 
-| | |
-|---|---|
-| [spec/00-conventions.md](spec/00-conventions.md) | terms, notation, byte and bit order, outcome vocabulary |
-| [spec/01-disc-image-layout.md](spec/01-disc-image-layout.md) | 2048, 2054 and 2064-byte sector formats, detection, LSN addressing, where the TOCs are |
-| [spec/02-master-toc-and-text.md](spec/02-master-toc-and-text.md) | the master TOC, album set, catalogue numbers, genres, date, locales, text channels, character sets |
-| [spec/03-area-toc.md](spec/03-area-toc.md) | 2-channel and multichannel area TOCs, TOC-1 and TOC-2, tracks, timecodes, ISRCs, track text |
-| [spec/04-audio-multiplexing.md](spec/04-audio-multiplexing.md) | audio sectors, packets, frame reassembly, frames on the timeline, tracks |
-| [spec/05-dst.md](spec/05-dst.md) | the complete DST frame syntax and decoding process |
-| [spec/06-ps3-protocol.md](spec/06-ps3-protocol.md) | the PS3 SACD Ripper network protocol (optional) |
-| [spec/07-validation-and-limits.md](spec/07-validation-and-limits.md) | every limit and check, the required behaviour, diagnostic codes |
-| [spec/08-output-containers.md](spec/08-output-containers.md) | writing tracks and frame ranges as DSF (with ID3v2 tags, optionally gapless) and DSDIFF files (optional) |
-| [spec/charsets/](spec/charsets/) | normative mapping tables for the CJK character sets of specification 2 |
-| [corpus/](corpus/README.md) | synthetic images, `manifest.json` with expected TOCs and decoded-audio hashes |
-| [benchmarks/](benchmarks/README.md) | how readers are compared for speed: the benchmark program's interface, method, baseline, targets and results (informative) |
-| [PROVENANCE.md](PROVENANCE.md) | what was consulted to write each part |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | how issues are planned, labelled and claimed, and how changes are made |
-| [SECURITY.md](SECURITY.md) | reporting a gap that puts readers at risk |
+- [Using the corpus](corpus/README.md): the manifest, and how to compare a reader's results with
+  it (TOC equality, warning sets, per-channel SHA-256 hashes of each track's decoded DSD)
+- [Benchmarks](benchmarks/README.md): how readers are compared for speed, and the results
+- [Provenance](PROVENANCE.md): what was consulted to write each part, and the
+  [open points](PROVENANCE.md#open-points)
+- [Contributing](CONTRIBUTING.md): how issues are planned and claimed, and how changes are made
+- [Security](SECURITY.md): reporting a gap that puts readers at risk
 
 ## The clean-room process
 
@@ -75,12 +82,6 @@ repository only, and who listed every ambiguity, undefined term, missing limit a
 behaviour would have to be guessed. Each finding was fixed, and the review repeated until a
 pass found nothing material.
 
-## Using the corpus
-
-[corpus/README.md](corpus/README.md) describes the manifest and how to compare a reader's
-results with it: TOC equality, warning sets, and per-channel SHA-256 hashes of each track's
-decoded DSD.
-
 ## Status
 
 Version 1.0-draft. The behaviour specified for malformed input is deliberately conservative
@@ -97,13 +98,19 @@ are recommended (SHOULD) rather than required, and a reader that reports them re
 values. Points that could not be specified with full confidence are listed in
 [PROVENANCE.md](PROVENANCE.md#open-points).
 
-## Licences
+## Licence and credits
 
 - The specifications and all other documentation: **Creative Commons Attribution 4.0
   International** (CC BY 4.0), see [LICENSE](LICENSE).
 - The conformance corpus (`corpus/`, images and manifest) and the character-set tables
-  (`spec/charsets/`): **CC0 1.0 Universal** (public
-  domain dedication), see [corpus/LICENSE](corpus/LICENSE).
+  (`spec/charsets/`): **CC0 1.0 Universal** (public domain dedication), see
+  [corpus/LICENSE](corpus/LICENSE). The test data is CC0 so that implementations under any
+  licence can copy it into their own test suites.
 
-The test data is CC0 so that implementations under any licence can copy it into their own
-test suites.
+Sources, each recorded with its version in [PROVENANCE.md](PROVENANCE.md):
+
+- pysacd (GPL-2.0-or-later; its DST decoder LGPL-2.1-or-later): its documentation, including
+  a prior clean-room description of DST, and its behaviour on real and hostile images.
+- Sony's *DSF File Format Specification* 1.01 and Philips' *DSDIFF* 1.5 specification (public
+  documents; facts restated, no text copied), for specification 8.
+- M. Nilsson's *ID3 tag version 2.4.0* and *2.3.0* documents, for the tags of specification 8.
