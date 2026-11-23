@@ -1,8 +1,10 @@
+[sacd-spec](../README.md) › Benchmarks
+
 # Benchmarks
 
 How readers built from these specifications are compared for speed, the interface a reader
 offers so that it can be measured, and the targets. This document is informative: it adds
-no requirement to specifications 0 to 7, and a reader can conform without meeting any
+no requirement to specifications 0 to 8, and a reader can conform without meeting any
 target here.
 
 ## The wall
@@ -374,3 +376,9 @@ Whole collection, the 114 areas `sacd_extract` reads: `sacd_extract` 41.3 min, r
 - The single-thread figure on real disc frames (0.278 ms) differs from figures on corpus
   frames; only real-disc figures are used for the targets.
 - The release assets carry checksums but no build provenance attestation.
+
+## See also
+
+- [Conformance corpus](../corpus/README.md)
+- [Provenance](../PROVENANCE.md#benchmarksreadmemd)
+- [README](../README.md)

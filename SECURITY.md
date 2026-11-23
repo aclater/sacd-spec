@@ -1,3 +1,5 @@
+[sacd-spec](README.md) › Security policy
+
 # Security policy
 
 This repository holds a specification and test data, not software. A security problem
@@ -18,3 +20,9 @@ send copies of commercial discs).
 
 Gaps that don't put readers at risk (an ambiguous sentence, a missing example) are
 welcome as ordinary issues.
+
+## See also
+
+- [Validation and limits (specification 7)](spec/07-validation-and-limits.md)
+- [Contributing](CONTRIBUTING.md)
+- [Conformance corpus](corpus/README.md)

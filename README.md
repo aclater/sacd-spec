@@ -28,7 +28,7 @@ any SACD code can write a correct reader from this repository alone.
 
 ## Quick start
 
-You need git and about 50 MB of disk space; the corpus check uses Python 3.
+You need git and about 190 MB of disk space (the corpus images are about 180 MB); the corpus check uses Python 3.
 
 1. Get the specifications and the corpus: `git clone https://github.com/aclater/sacd-spec.git`,
    then `cd sacd-spec`.
