@@ -1,3 +1,5 @@
+<img src="docs/assets/icon-256.png" alt="" width="96">
+
 # sacd-spec
 
 [![Licence: CC BY 4.0](https://img.shields.io/badge/licence-CC%20BY%204.0-lightgrey)](LICENSE)
